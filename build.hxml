@@ -1,0 +1,17 @@
+
+-cp src
+-cp ../hx.html5
+-cp ../chrome.extension
+-js ext/app.js
+dox.chrome.App
+-D DEBUG
+#--no-traces
+
+--next
+-cp src
+-cp ../hx.html5
+-cp ../chrome.extension
+-js ext/options.js
+dox.chrome.Options
+-D DEBUG
+#--no-traces

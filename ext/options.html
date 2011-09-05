@@ -1,0 +1,81 @@
+<html>
+<head>
+<title>DOX settings</title>
+<link rel="icon" href="icons/icon_16.png">
+<style type="text/css">
+* {
+	margin: 0px;
+	padding: 0px;
+}
+body {
+	display: block;
+	font-family: "trebuchet ms", sans-serif, arial;
+	font-size: 10.5pt;
+}
+button {
+	display: inline-block;
+	background-color: #4B8DF9;
+	border: 1px solid #2F5BB7;
+	border-radius: 2px;
+	border-collapse: separate;
+	border-spacing: 2px;
+	box-shadow: inset 0px 1px 8px rgba(0, 0, 0, 0.1);
+	font-size: small;
+	font-family: "trebuchet ms", sans-serif, arial;
+	text-align: center;
+	color: #fff;
+	padding: 6px 10px;
+	-webkit-user-select: none;
+	cursor: pointer;
+}
+button:hover {
+	background-color: #357AE8;
+	background-image: -webkit-linear-gradient(top,#4D90FE,#357AE8);
+	border: 1px solid #2F5BB7;
+	box-shadow: inset 0px 1px 8px rgba(0, 0, 0, 0.1);
+}
+
+#title {
+	padding: 6px 10px 6px 10px;
+	font-size: 25px;
+	font-weight: bold;
+}
+.block {
+	padding: 10px 10px 14px 18px;
+	margin-bottom: 1px;
+	background-color: #eee;
+}
+.block .title {
+	font-size: 20px;
+	color: #09598A;
+}
+</style>
+<script src="jquery.js"></script>
+<script src="options.js"></script>
+<script>$(dox.chrome.Options.init);</script>
+</head>
+<body>
+
+<div id="ui">
+	
+	<div id="title">DOX.settings</div>
+	
+	<div class="block">
+		<button id="btn_loadapi"><div>RELOAD API</div></button>
+	</div>
+	
+	<div class="block">
+		<div class="title">Settings</div>
+		<!--
+		<div>Doc path: <input type="url" id="docpath" value="wtf"></div>
+		<div>Max suggestions: <span id="maxsuggestions_display"></span><input type="range" id="maxsuggestions" min="1" max="100" step="1" value="10"></div>
+		-->
+		<div>Suggest haxe.org/wiki search: <input type="checkbox" id="haxeorgsearch"/></div>
+		<div>Suggest google code search: <input type="checkbox" id="googlecodesearch"/></div>
+		<div>Suggest google development search: <input type="checkbox" id="googledevelopmentsearch"/></div>
+		<div>Suggest stackoverflow search: <input type="checkbox" id="stackoverflowsearch"/></div>
+	</div>
+	
+</div>
+</body>
+</html>
