@@ -13,9 +13,11 @@ class Options {
 		trace( "DOX.options" );
 		#end
 		
+		/*
 		j( '#btn_loadapi' ).click(function(e) {
-			app.loadAPI();
-		});	
+			//app.loadAPI();
+		});
+		*/	
 		
 		/* 
 		var j_maxsuggestions = j( '#maxsuggestions' ).val( Std.string( app.maxSuggestions ) );

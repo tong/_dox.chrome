@@ -1,0 +1,30 @@
+
+api/_js.hxml
+-js temp.js
+--no-output
+-xml api/js.xml
+
+--next
+api/_flash.hxml
+-swf temp.swf
+--no-output
+-xml api/flash.xml
+
+--next
+api/_neko.hxml
+-neko temp.n
+--no-output
+-xml api/neko.xml
+
+--next
+api/_php.hxml
+-php temp
+--no-output
+-xml api/php.xml
+
+--next
+api/_cpp.hxml
+-D HXCPP_MULTI_THREADED
+-cpp temp
+--no-output
+-xml api/cpp.xml

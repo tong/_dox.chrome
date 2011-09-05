@@ -6,21 +6,25 @@ using StringTools;
 
 class App implements IApp {
 	
-	static var API_DEF_REMOTE_PATH = "http://dox.disktree.net/"; //TODO
-	
-	//TODO
-	static var api_files = [
+	static var API_DEF_REMOTE_PATH =
+		#if DEBUG
+		"http://192.168.0.110/dox.chrome/api/"
+		//"http://dox.disktree.net/api/"
+		#else
+		"https://github.com/tong/dox.chrome/api/"
+		#end;
+		
 		/*
-		{ file : "flash.xml", platform : "flash" },
-		{ file : "flash9.xml", platform : "flash9" },
-		{ file : "neko.xml", platform : "neko" },
-		{ file : "js.xml", platform : "js" },
-		{ file : "php.xml", platform : "php" },
-		{ file : "cpp.xml", platform : "cpp" },
-		*/
-		{ file : "api", platform : "js" }
+	static var api_files : Array<TypeDescription> = [
+		//{ file : "js.xml", platform : "js" },
+//		{ file : "neko.xml", platform : "neko" },
+		//{ file : "php.xml", platform : "php" },
+		//{ file : "cpp.xml", platform : "cpp" }
+		//{ file : "flash.xml", platform : "flash" },
 	];
+	*/
 	
+	static var fs : FileSystem;
 	static var api : haxe.rtti.XmlParser;
 	static var traverser : Array<Array<SuggestResult>>;
 
@@ -33,7 +37,7 @@ class App implements IApp {
 	
 	function new() {
 		
-//		LocalStorage.clear(); return;
+	//	LocalStorage.clear(); return;
 		
 		var settings = Settings.load();
 		if( settings == null ) {
@@ -53,10 +57,137 @@ class App implements IApp {
 			this.useStackoverflowSearch = settings.useStackoverflowSearch;
 		}
 		
+		/*
 		api = Storage.getObject( 'api' );
-		if( api == null )
-			loadAPI();
+		if( api == null ) {
+			api = new haxe.rtti.XmlParser();
+			for( f in api_files ) {
+				loadAPI( f );
+			}
+			Storage.setObject( "api", api );
+		}
+		*/
 		
+		/*
+		api = new haxe.rtti.XmlParser();
+		for( f in api_files ) {
+			//loadAPI( f );
+			api.process( Xml.parse( haxe.Http.requestUrl( API_DEF_REMOTE_PATH+f.file ) ).firstElement(), f.platform );
+			api.sort();
+			trace( JSON.stringify(api) );
+		}*/
+		//api = new haxe.rtti.XmlParser();
+		//api.process( Xml.parse( haxe.Http.requestUrl( "http://192.168.0.110/dox.chrome/api_json/js" ) ).firstElement(), f.platform );
+		
+		/*
+		api = new haxe.rtti.XmlParser();
+		for( f in ["flash","js","neko","php"] ) {
+			api.process( Xml.parse( haxe.Http.requestUrl( "http://192.168.0.110/dox.chrome/api_xml/"+f+".xml" ) ).firstElement(), f );
+			api.sort();
+		}
+		trace( JSON.stringify(api) );
+		*/
+		
+		/*
+		var apiUpdateRequired = true;
+		var haveHaxeVersion = LocalStorage.getItem( "haxe_version" );
+		if( haveHaxeVersion != null ) {
+			var actualHaxeVersion = haxe.Http.requestUrl( "http://haxe.org/file/CHANGES.txt" ).split( "\n" )[0].split( " " )[1];
+			trace("TODO compare haxe version");
+		}
+		if( apiUpdateRequired ) {
+			//updateAPI();
+			//...
+			trace("apiUpdateRequiredapiUpdateRequiredapiUpdateRequired");
+			return;
+		}
+		*/
+		
+		var me = this;
+		untyped window.webkitRequestFileSystem( window.PERSISTENT, 10*1024*1024, function(fs){
+			App.fs = fs;
+			/*
+			// remove file
+			fs.root.getFile( 'api', {create:false}, function(fe) {
+				fe.remove(function() {
+					trace( 'File removed.' );
+				});
+			});
+			*/
+			trace( 'Opened file system: '+fs.name );
+			fs.root.getFile( "api", {},
+				function(fe){
+					
+					//TODO
+					// already have api description, is it up to date ?
+					// check here ...
+					//if( haveActualAPI() ) {}
+					
+					fe.file(function(file){
+						var r = new FileReader();
+						r.onloadend = function(e) {
+							var data = r.result;
+							api = JSON.parse( r.result );
+							me.run();
+						}
+						r.readAsText( file );
+					});
+				},
+				function(err:FileError){
+					if( err.code == FileError.NOT_FOUND_ERR ) {
+						me.updateAPI(); // don't have api description, so load it
+					} else {
+						trace( "??? unexpected error "+err.code );
+					}
+				}
+			);
+		});
+	}
+	
+	function updateAPI() {
+		//TODO update the api in case we don't have one or if a newer (haxe version) is available
+		var me = this;
+		var data = haxe.Http.requestUrl( API_DEF_REMOTE_PATH+"all" );
+		api = JSON.parse( data );
+		App.fs.root.getFile( 'api', {create:true}, function(fe:FileEntry) {
+			fe.createWriter(function(fw) {
+				fw.onwriteend = function(e) {
+					trace( "File write complete");
+					me.run();
+				}
+				fw.onerror = function(e) {
+					trace( 'File write failed: '+e.toString());
+				}
+				var bb = new BlobBuilder();
+				bb.append( data );
+				fw.write( bb.getBlob('text/plain') );
+			});
+		});
+	}
+	
+	/*
+	public function loadAPI( desc : TypeDescription ) {
+		trace( "Loading type description ("+desc.platform+"): "+API_DEF_REMOTE_PATH+desc.file  );
+		api.process( Xml.parse( haxe.Http.requestUrl( API_DEF_REMOTE_PATH+desc.file ) ).firstElement(), desc.platform );
+		api.sort();
+	}
+	*/
+	/* 
+	public function loadAllAPIs() {
+		trace( "Loading "+api_files.length+" APIs " );
+		for( f in api_files ) loadAPI( f );
+		Storage.setObject( "api", api );
+	}
+	*/
+	
+	#if DEBUG
+	public function log( v : Dynamic, ?inf : haxe.PosInfos ) {
+		haxe.Log.trace( v, inf );
+	}
+	#end
+	
+	function run() {
+	
 		Omnibox.onInputStarted.addListener(
 			function(){
 				setDefaultSuggestion( "" );
@@ -92,6 +223,7 @@ class App implements IApp {
 				traverser = new Array<Array<SuggestResult>>();
 				for( i in 0... 4 ) traverser.push( new Array<SuggestResult>() );
 				searchSuggestions( api.root, term );
+				
 				for( t in traverser ) {
 					for( s in t ) {
 						if( suggestions.length < maxSuggestions ) {
@@ -187,29 +319,9 @@ class App implements IApp {
 	        	}
 			}
 		);
+		
+		trace( "DOX extension active ..." );
 	}
-	
-	//TODO
-	public function loadAPI() {
-		api = new haxe.rtti.XmlParser();
-		/*
-		for( f in api_files ) {
-			var x = Xml.parse( haxe.Http.requestUrl( API_DEF_REMOTE_PATH ) ).firstElement();
-			//var x = Xml.parse( haxe.Resource.getString( f.file ) ).firstElement();
-			api.process( x, f.platform );
-		}
-		*/
-		var x = Xml.parse( haxe.Http.requestUrl( API_DEF_REMOTE_PATH+"/api.xml" ) ).firstElement();
-		api.process( x, "js" );
-		api.sort();
-		Storage.setObject( "api", api );
-	}
-	
-	#if DEBUG
-	public function log( v : Dynamic, ?inf : haxe.PosInfos ) {
-		haxe.Log.trace( v, inf );
-	}
-	#end
 	
 	function searchSuggestions( root : Array<TypeTree>, term : String ) {
 		//trace( "SEARCH: "+term, "info" );
