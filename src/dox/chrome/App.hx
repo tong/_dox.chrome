@@ -355,7 +355,12 @@ class App implements IApp {
 	function addTypeSuggestion( term : String, t : { path : String, doc : String }, level : Int = 0 ) : Bool {
 		var name = getTypeName( t.path );
 		return if( name.toLowerCase().startsWith( term ) ) {
-			var url = docpath + t.path.split( "." ).join( "/" ).toLowerCase();
+			
+			var path = t.path.split( "." ).join( "/" ).toLowerCase();
+			if( path.startsWith( "flash" ) ) // hacking flash9 target path
+				path = "flash9"+path.substr(5);
+			
+			var url = docpath + path;
 			var description =  "<match>"+name+"</match>";
 			if( t.path != name ) description += " ("+t.path+")";
 			if( t.doc != null ) {
