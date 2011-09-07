@@ -13,11 +13,22 @@ class Options {
 		trace( "DOX.options" );
 		#end
 		
-		/*
-		j( '#btn_loadapi' ).click(function(e) {
-			//app.loadAPI();
+		j( '#info' ).hide();
+		
+		var j_reload = j( '#btn_loadapi' );
+		j_reload.click(function(e) {
+			j_reload.hide();
+			haxe.Timer.delay( function(){
+				app.updateAPI( function(err){
+					if( err != null ) {
+						j( '#info' ).css("backgroundColor","#ff0000").html( 'ERROR reloading api: '+err ).slideDown(200).delay(2000).slideUp(200);
+					} else {
+						j( '#info' ).css("backgroundColor","#ccc").html( 'API got reloaded' ).slideDown(200).delay(1000).slideUp(200);
+					}
+					j_reload.show();
+				});
+			}, 1 );
 		});
-		*/	
 		
 		/* 
 		var j_maxsuggestions = j( '#maxsuggestions' ).val( Std.string( app.maxSuggestions ) );
@@ -43,7 +54,7 @@ class Options {
 		});
 	}
 	
-	static inline function j( id : String ) : js.JQuery { return new js.JQuery( id ); }
+	static inline function j( id : Dynamic ) : js.JQuery { return new js.JQuery( id ); }
 
 	#if DEBUG
 	static inline function mytrace( v : Dynamic, ?inf : haxe.PosInfos ) { app.log( v, inf ); }

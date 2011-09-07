@@ -23,7 +23,7 @@ haxe.BaseCode
 haxe.FastList
 haxe.Firebug
 haxe.Http
-haxe.Int32
+#haxe.Int32
 haxe.Log
 haxe.Md5
 haxe.Resource
@@ -58,16 +58,16 @@ haxe.io.StringInput
 #haxe.remoting.Proxy
 #haxe.remoting.AsyncAdapter
 #haxe.remoting.DelayedConnection
-##haxe.remoting.SocketConnection
+#haxe.remoting.SocketConnection
 #haxe.remoting.AsyncConnection
-#haxe.remoting.ExternalConnection
-##haxe.remoting.SocketProtocol
+##haxe.remoting.ExternalConnection
+#haxe.remoting.SocketProtocol
 #haxe.remoting.AsyncDebugConnection
 #haxe.remoting.FlashJsConnection
 ##haxe.remoting.SocketWrapper
 #haxe.remoting.AsyncProxy
 #haxe.remoting.HttpAsyncConnection
-#haxe.remoting.SyncSocketConnection
+##haxe.remoting.SyncSocketConnection
 #haxe.remoting.Connection
 #haxe.remoting.HttpConnection
 #haxe.remoting.ContextAll
@@ -85,7 +85,7 @@ haxe.unit.TestResult
 haxe.unit.TestRunner
 haxe.unit.TestStatus
 
-#haxe.web.Dispatch
+haxe.web.Dispatch
 
 haxe.xml.Check
 haxe.xml.Fast

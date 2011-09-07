@@ -35,6 +35,12 @@ button:hover {
 	box-shadow: inset 0px 1px 8px rgba(0, 0, 0, 0.1);
 }
 
+#info {
+	background: #ccc;
+	width: 100%;
+	padding: 10px;
+}
+
 #title {
 	padding: 6px 10px 6px 10px;
 	font-size: 25px;
@@ -58,25 +64,29 @@ button:hover {
 
 <div id="ui">
 	
+	<div id="info">wtf</div>
 	<div id="title">DOX.settings</div>
-	<div>Work in progress</div>
-		<!--
+	
 	<div class="block">
-		<button id="btn_loadapi"><div>RELOAD API</div></button>
+		<button id="btn_loadapi"><div>Reload API description</div></button>
 	</div>
 	
 	<div class="block">
-		<div class="title">Settings</div>
-
+		
+		<!-- 
 		<div>Doc path: <input type="url" id="docpath" value="wtf"></div>
 		<div>Max suggestions: <span id="maxsuggestions_display"></span><input type="range" id="maxsuggestions" min="1" max="100" step="1" value="10"></div>
-
-		<div>Suggest haxe.org/wiki search: <input type="checkbox" id="haxeorgsearch"/></div>
-		<div>Suggest google code search: <input type="checkbox" id="googlecodesearch"/></div>
-		<div>Suggest google development search: <input type="checkbox" id="googledevelopmentsearch"/></div>
-		<div>Suggest stackoverflow search: <input type="checkbox" id="stackoverflowsearch"/></div>
-	</div>
 		-->
+		
+		<div>
+			<div>Suggest searches on the following websites if nothing is found in the haXe API</div>
+			<div><input type="checkbox" id="haxeorgsearch"/> <span>HaXe wiki</span></div>
+			<div><input type="checkbox" id="googlecodesearch"/> <span>Google code</span></div>
+			<div><input type="checkbox" id="googledevelopmentsearch"/> <span>Google development</span></div>
+			<div><input type="checkbox" id="stackoverflowsearch"/> <span>Stackoverflow</span></div>
+		</div>
+		
+	</div>
 	
 </div>
 </body>

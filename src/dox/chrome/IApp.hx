@@ -10,8 +10,7 @@ interface IApp {
 	var useGoogleDevelopmentSearch : Bool;
 	var useStackoverflowSearch : Bool;
 	
-	//function loadAllAPIs() : Void;
-	//function loadAPI( desc : TypeDescription ) : Void;
+	function updateAPI( ?cb : String->Void ) : Void;
 	
 	#if DEBUG
 	function log( v : Dynamic, ?inf : haxe.PosInfos ) : Void;

@@ -6,28 +6,14 @@ using StringTools;
 
 class App implements IApp {
 	
-	static var API_DEF_REMOTE_PATH =
-		#if DEBUG
-		"http://192.168.0.110/dox.chrome/api/"
-		//"http://dox.disktree.net/api/"
-		#else
-		"https://github.com/tong/dox.chrome/api/"
-		#end;
-		
-		/*
-	static var api_files : Array<TypeDescription> = [
-		//{ file : "js.xml", platform : "js" },
-//		{ file : "neko.xml", platform : "neko" },
-		//{ file : "php.xml", platform : "php" },
-		//{ file : "cpp.xml", platform : "cpp" }
-		//{ file : "flash.xml", platform : "flash" },
-	];
-	*/
+	static var API_DEF_REMOTE_PATH = "https://raw.github.com/tong/dox.chrome/master/";
+	//static var API_DEF_REMOTE_PATH = "http://192.168.0.110/dox.chrome/";
 	
 	static var fs : FileSystem;
 	static var api : haxe.rtti.XmlParser;
 	static var traverser : Array<Array<SuggestResult>>;
-
+	static var actualAPIVersion : String;
+	
 	public var docpath : String;
 	public var maxSuggestions : Int;
 	public var useHaxeOrgSearch : Bool;
@@ -57,55 +43,20 @@ class App implements IApp {
 			this.useStackoverflowSearch = settings.useStackoverflowSearch;
 		}
 		
-		/*
-		api = Storage.getObject( 'api' );
-		if( api == null ) {
-			api = new haxe.rtti.XmlParser();
-			for( f in api_files ) {
-				loadAPI( f );
+		var needAPIUpdate = true;
+		var myAPIVersion = LocalStorage.getItem( 'api_version' );
+		actualAPIVersion = haxe.Http.requestUrl( API_DEF_REMOTE_PATH+"version" );
+		if( myAPIVersion != null ) {
+			trace( "Actual API version: "+actualAPIVersion +" : My API version"+ myAPIVersion );
+			if( actualAPIVersion == myAPIVersion ) {
+				needAPIUpdate = false;
 			}
-			Storage.setObject( "api", api );
 		}
-		*/
-		
-		/*
-		api = new haxe.rtti.XmlParser();
-		for( f in api_files ) {
-			//loadAPI( f );
-			api.process( Xml.parse( haxe.Http.requestUrl( API_DEF_REMOTE_PATH+f.file ) ).firstElement(), f.platform );
-			api.sort();
-			trace( JSON.stringify(api) );
-		}*/
-		//api = new haxe.rtti.XmlParser();
-		//api.process( Xml.parse( haxe.Http.requestUrl( "http://192.168.0.110/dox.chrome/api_json/js" ) ).firstElement(), f.platform );
-		
-		/*
-		api = new haxe.rtti.XmlParser();
-		for( f in ["flash","js","neko","php"] ) {
-			api.process( Xml.parse( haxe.Http.requestUrl( "http://192.168.0.110/dox.chrome/api_xml/"+f+".xml" ) ).firstElement(), f );
-			api.sort();
-		}
-		trace( JSON.stringify(api) );
-		*/
-		
-		/*
-		var apiUpdateRequired = true;
-		var haveHaxeVersion = LocalStorage.getItem( "haxe_version" );
-		if( haveHaxeVersion != null ) {
-			var actualHaxeVersion = haxe.Http.requestUrl( "http://haxe.org/file/CHANGES.txt" ).split( "\n" )[0].split( " " )[1];
-			trace("TODO compare haxe version");
-		}
-		if( apiUpdateRequired ) {
-			//updateAPI();
-			//...
-			trace("apiUpdateRequiredapiUpdateRequiredapiUpdateRequired");
-			return;
-		}
-		*/
 		
 		var me = this;
 		untyped window.webkitRequestFileSystem( window.PERSISTENT, 10*1024*1024, function(fs){
 			App.fs = fs;
+			
 			/*
 			// remove file
 			fs.root.getFile( 'api', {create:false}, function(fe) {
@@ -114,9 +65,17 @@ class App implements IApp {
 				});
 			});
 			*/
-			trace( 'Opened file system: '+fs.name );
+			
+			if( needAPIUpdate ) {
+				me.updateAPI();
+				return;
+			}
+			
+			//trace( 'Opened file system: '+fs.name );
 			fs.root.getFile( "api", {},
 				function(fe){
+					
+					trace("Already do have the API description");
 					
 					//TODO
 					// already have api description, is it up to date ?
@@ -132,9 +91,12 @@ class App implements IApp {
 						}
 						r.readAsText( file );
 					});
+					//trace("Loading it anyway .....");
+					//me.updateAPI();
 				},
 				function(err:FileError){
 					if( err.code == FileError.NOT_FOUND_ERR ) {
+						trace( "Don't have a API description, load it" );
 						me.updateAPI(); // don't have api description, so load it
 					} else {
 						trace( "??? unexpected error "+err.code );
@@ -144,19 +106,24 @@ class App implements IApp {
 		});
 	}
 	
-	function updateAPI() {
+	public function updateAPI( ?cb : String->Void ) {
+		trace( "Updating API ("+API_DEF_REMOTE_PATH+")");
 		//TODO update the api in case we don't have one or if a newer (haxe version) is available
 		var me = this;
-		var data = haxe.Http.requestUrl( API_DEF_REMOTE_PATH+"all" );
+		var data = haxe.Http.requestUrl( API_DEF_REMOTE_PATH+"haxe_api" );
 		api = JSON.parse( data );
+		trace( "API file loaded" );
 		App.fs.root.getFile( 'api', {create:true}, function(fe:FileEntry) {
 			fe.createWriter(function(fw) {
 				fw.onwriteend = function(e) {
-					trace( "File write complete");
+					trace( "API file written to local file system");
 					me.run();
+					if( cb != null ) cb( null );
 				}
 				fw.onerror = function(e) {
-					trace( 'File write failed: '+e.toString());
+					trace( 'Failed to write into local file system: '+e.toString());
+					//if( active ) { TODO }
+					if( cb != null ) cb( e.toString() );
 				}
 				var bb = new BlobBuilder();
 				bb.append( data );
@@ -165,29 +132,14 @@ class App implements IApp {
 		});
 	}
 	
-	/*
-	public function loadAPI( desc : TypeDescription ) {
-		trace( "Loading type description ("+desc.platform+"): "+API_DEF_REMOTE_PATH+desc.file  );
-		api.process( Xml.parse( haxe.Http.requestUrl( API_DEF_REMOTE_PATH+desc.file ) ).firstElement(), desc.platform );
-		api.sort();
-	}
-	*/
-	/* 
-	public function loadAllAPIs() {
-		trace( "Loading "+api_files.length+" APIs " );
-		for( f in api_files ) loadAPI( f );
-		Storage.setObject( "api", api );
-	}
-	*/
-	
 	#if DEBUG
-	public function log( v : Dynamic, ?inf : haxe.PosInfos ) {
-		haxe.Log.trace( v, inf );
-	}
+	public function log( v : Dynamic, ?inf : haxe.PosInfos ) { haxe.Log.trace( v, inf ); }
 	#end
 	
 	function run() {
-	
+		
+		trace( "Activting extension ..." );
+		
 		Omnibox.onInputStarted.addListener(
 			function(){
 				setDefaultSuggestion( "" );
@@ -320,7 +272,9 @@ class App implements IApp {
 			}
 		);
 		
-		trace( "DOX extension active ..." );
+		LocalStorage.setItem( 'api_version', actualAPIVersion );
+		
+		trace( "Extension active, use it!" );
 	}
 	
 	function searchSuggestions( root : Array<TypeTree>, term : String ) {
@@ -355,11 +309,9 @@ class App implements IApp {
 	function addTypeSuggestion( term : String, t : { path : String, doc : String }, level : Int = 0 ) : Bool {
 		var name = getTypeName( t.path );
 		return if( name.toLowerCase().startsWith( term ) ) {
-			
 			var path = t.path.split( "." ).join( "/" ).toLowerCase();
 			if( path.startsWith( "flash" ) ) // hacking flash9 target path
 				path = "flash9"+path.substr(5);
-			
 			var url = docpath + path;
 			var description =  "<match>"+name+"</match>";
 			if( t.path != name ) description += " ("+t.path+")";
