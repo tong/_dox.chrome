@@ -7,4 +7,5 @@ typedef TSettings = {
 	var useGoogleCodeSearch : Bool;
 	var useGoogleDevelopmentSearch : Bool;
 	var useStackoverflowSearch : Bool;
+	var useMailingListSearch : Bool;
 }

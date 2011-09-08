@@ -1,7 +1,7 @@
 {
 	"name": "dox",
 	"description": "HaXe API omnibox search",
-	"version": "0.1.3",
+	"version": "0.1.5",
 	"icons": {
 		"16": "icons/icon_16.png",
 		"32": "icons/icon_32.png",
@@ -14,11 +14,7 @@
 	"permissions": [
 		"tabs",
 		"unlimitedStorage",
-		
 		"https://raw.github.com/",
-		
-		"http://*/*",
-		
 		"http://haxe.org/"
 	]
 }

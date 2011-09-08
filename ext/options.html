@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>DOX settings</title>
+<title>dox-settings</title>
 <link rel="icon" href="icons/icon_16.png">
 <style type="text/css">
 * {
@@ -41,8 +41,14 @@ button:hover {
 	padding: 10px;
 }
 
-#title {
+#header {
 	padding: 6px 10px 6px 10px;
+}
+#header #icon {
+	float: left;
+}
+#header #title {
+	margin-left: 8px;
 	font-size: 25px;
 	font-weight: bold;
 }
@@ -64,8 +70,8 @@ button:hover {
 
 <div id="ui">
 	
-	<div id="info">wtf</div>
-	<div id="title">DOX.settings</div>
+	<div id="info"></div>
+	<div id="header"><img id="icon" src="icons/icon_32.png"/><span id="title">dox.settings</span></div>
 	
 	<div class="block">
 		<button id="btn_loadapi"><div>Reload API description</div></button>
@@ -81,6 +87,7 @@ button:hover {
 		<div>
 			<div>Suggest searches on the following websites if nothing is found in the haXe API</div>
 			<div><input type="checkbox" id="haxeorgsearch"/> <span>HaXe wiki</span></div>
+			<div><input type="checkbox" id="mailinglistsearch"/> <span>HaXe mailing list</span></div>
 			<div><input type="checkbox" id="googlecodesearch"/> <span>Google code</span></div>
 			<div><input type="checkbox" id="googledevelopmentsearch"/> <span>Google development</span></div>
 			<div><input type="checkbox" id="stackoverflowsearch"/> <span>Stackoverflow</span></div>

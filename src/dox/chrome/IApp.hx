@@ -9,6 +9,7 @@ interface IApp {
 	var useGoogleCodeSearch : Bool;
 	var useGoogleDevelopmentSearch : Bool;
 	var useStackoverflowSearch : Bool;
+	var useMailingListSearch : Bool;
 	
 	function updateAPI( ?cb : String->Void ) : Void;
 	

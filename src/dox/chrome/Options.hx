@@ -39,6 +39,7 @@ class Options {
 		*/
 		
 		searchSuggestionSetup( 'HaxeOrg' );
+		searchSuggestionSetup( 'MailingList' );
 		searchSuggestionSetup( 'GoogleCode' );
 		searchSuggestionSetup( 'GoogleDevelopment' );
 		searchSuggestionSetup( 'Stackoverflow' );

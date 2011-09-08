@@ -20,11 +20,12 @@ class App implements IApp {
 	public var useGoogleCodeSearch : Bool;
 	public var useGoogleDevelopmentSearch : Bool;
 	public var useStackoverflowSearch : Bool;
+	public var useMailingListSearch : Bool;
 	
 	function new() {
 		
 	//	LocalStorage.clear(); return;
-		
+
 		var settings = Settings.load();
 		if( settings == null ) {
 			this.docpath = 'http://haxe.org/api/';
@@ -33,6 +34,7 @@ class App implements IApp {
 			this.useGoogleCodeSearch = true;
 			this.useGoogleDevelopmentSearch = true;
 			this.useStackoverflowSearch = true;
+			this.useMailingListSearch = true;
 			Settings.save( this );
 		} else {
 			this.docpath = settings.docpath;
@@ -41,6 +43,7 @@ class App implements IApp {
 			this.useGoogleCodeSearch = settings.useGoogleCodeSearch;
 			this.useGoogleDevelopmentSearch = settings.useGoogleDevelopmentSearch;
 			this.useStackoverflowSearch = settings.useStackoverflowSearch;
+			this.useMailingListSearch = settings.useMailingListSearch;
 		}
 		
 		var needAPIUpdate = true;
@@ -140,25 +143,25 @@ class App implements IApp {
 		
 		trace( "Activting extension ..." );
 		
+		setDefaultSuggestion();
+
 		Omnibox.onInputStarted.addListener(
 			function(){
-				setDefaultSuggestion( "" );
+//				setDefaultSuggestion( "" );
 			}
 		);
 		
 		Omnibox.onInputCancelled.addListener(
 			function() {
 				trace( "Input cancelled" );
-				setDefaultSuggestion( "" );
+//				setDefaultSuggestion( "" );
 			}
 		);
-		
-		setDefaultSuggestion( "" );
 		
 		Omnibox.onInputChanged.addListener(
 			function(text,suggest) {
 				
-				setDefaultSuggestion( text );
+//				setDefaultSuggestion( text );
 				
 				if( text == null )
 		            return;
@@ -166,7 +169,7 @@ class App implements IApp {
 				if( stripped_text == null )
 					return;
 				if( stripped_text == "" ) {
-					setDefaultSuggestion( "" );
+					setDefaultSuggestion();
 					return;
 				}
 				
@@ -189,7 +192,15 @@ class App implements IApp {
 						suggestions.push(
 					 		{
 					 			content : stripped_text+" [Haxe.org Search]",
-					 			description : [ "Search for \" <match>", stripped_text, "</match> \" using <match><url>Haxe.org</url></match> - <url>http://haxe.org/wiki/search?s=", StringTools.urlEncode( stripped_text ), "</url>" ].join( '' )
+					 			description : [ "Search for \"<match>", stripped_text, "</match>\" at <match><url>Haxe.org</url></match> - <url>http://haxe.org/wiki/search?s=", StringTools.urlEncode( stripped_text ), "</url>" ].join( '' )
+					 		}
+						);
+					}
+					if( useMailingListSearch ) {
+						suggestions.push(
+					 		{
+					 			content : stripped_text+" [Mailing List Search]",
+					 			description : [ "Search for \"<match>", stripped_text, "</match>\" at <match><url>Maling List Search</url></match> - <url>http%3A%2F%2Fhaxe.1354130.n2.nabble.com%2Ftemplate%2FNamlServlet.jtp%3Fmacro%3Dsearch_page%26node%3D1354130%26query%3D", StringTools.urlEncode(stripped_text), "</url>" ].join( '' )
 					 		}
 						);
 					}
@@ -197,7 +208,7 @@ class App implements IApp {
 						suggestions.push(
 					 		{
 					 			content : stripped_text+" [Google Code Search]",
-					 			description : [ "Search for \"<dim>haXe</dim> <match>", stripped_text, "</match> <dim>lang:haxe</dim>\" using <match><url>Google Code Search</url></match> - <url>http://www.google.com/codesearch?q=", StringTools.urlEncode( "haxe " + stripped_text + " lang:haxe"), "</url>" ].join( '' )
+					 			description : [ "Search for \"<dim>haXe</dim> <match>", stripped_text, "</match> <dim>lang:haxe</dim>\" at <match><url>Google Code Search</url></match> - <url>http://www.google.com/codesearch?q=", StringTools.urlEncode( "haxe " + stripped_text + " lang:haxe"), "</url>" ].join( '' )
 					 		}
 						);
 					}
@@ -205,7 +216,7 @@ class App implements IApp {
 						suggestions.push(
 					 		{
 					 			content : stripped_text+" [Development and Coding Search]",
-					 			description : [ "Search for \"<match>", stripped_text, "</match>\" using <match><url>Develoment and Coding Search</url></match> - <url>http://www.google.com/cse?cx=005154715738920500810:fmizctlroiw&amp;q=", StringTools.urlEncode( stripped_text ), "</url>" ].join( '' )
+					 			description : [ "Search for \"<match>", stripped_text, "</match>\" at <match><url>Develoment and Coding Search</url></match> - <url>http://www.google.com/cse?cx=005154715738920500810:fmizctlroiw&amp;q=", StringTools.urlEncode( stripped_text ), "</url>" ].join( '' )
 					 		}
 						);
 					}
@@ -213,7 +224,7 @@ class App implements IApp {
 						suggestions.push(
 					 		{
 					 			content : stripped_text+" [Stackoverflow Search]",
-					 			description : [ "Search for \"<match>", stripped_text, "</match>\" using <match><url>Stackoverflow Search</url></match> - <url>http://stackoverflow.com/search?q=", StringTools.urlEncode( "haxe "+stripped_text ), "</url>" ].join( '' )
+					 			description : [ "Search for \"<match>", stripped_text, "</match>\" at <match><url>Stackoverflow Search</url></match> - <url>http://stackoverflow.com/search?q=", StringTools.urlEncode( "haxe "+stripped_text ), "</url>" ].join( '' )
 					 		}
 						);
 					}
@@ -246,27 +257,28 @@ class App implements IApp {
         		
         		var suffix = " [Haxe.org Search]";
         		if( stripped_text.endsWith( suffix ) ) {
-        			var query = stripped_text.substr( 0, stripped_text.length - suffix.length ).trim();
-        			nav( "http://haxe.org/wiki/search?s="+StringTools.urlEncode( query ) );
+        			nav( "http://haxe.org/wiki/search?s="+formatSearchSuggestionQuery( stripped_text, suffix ) );
 					return;
         		}
+        		suffix = " [Mailing List Search]";
+	        	if( stripped_text.endsWith( suffix ) ) {
+	        		nav( "http://haxe.1354130.n2.nabble.com/template/NamlServlet.jtp?macro=search_page&node=1354130&query="+formatSearchSuggestionQuery( stripped_text, suffix )  );
+	        		return;
+	        	}
         		suffix = " [Google Code Search]";
         		if( stripped_text.endsWith( suffix ) ) {
-					var query = stripped_text.substr( 0, stripped_text.length - suffix.length ).trim();
-					//nav( "http://www.google.com/codesearch?q="+StringTools.urlEncode( "haxe "+newquery + " lang:haxe" ) ); // dows not work, google does not know lang:haxe
-					nav( "http://www.google.com/codesearch?q="+StringTools.urlEncode( "haxe "+query ) );
+					//nav( "http://www.google.com/codesearch?q="+StringTools.urlEncode( "haxe "+newquery + " lang:haxe" ) ); // does not work, google does not know lang:haxe
+					nav( "http://www.google.com/codesearch?q="+StringTools.urlEncode( "haxe "+formatSearchSuggestionQuery( stripped_text, suffix ) ) );
 					return;
 				}
 	        	suffix = " [Development and Coding Search]";
 	        	if( stripped_text.endsWith( suffix ) ) {
-	        		var query = stripped_text.substr( 0, stripped_text.length - suffix.length ).trim();
-	        		nav( "http://www.google.com/cse?cx=005154715738920500810:fmizctlroiw&q=" + StringTools.urlEncode( query ) );
+	        		nav( "http://www.google.com/cse?cx=005154715738920500810:fmizctlroiw&q="+formatSearchSuggestionQuery( stripped_text, suffix ) );
 	        		return;
 	        	}
 				suffix = " [Stackoverflow Search]";
 	        	if( stripped_text.endsWith( suffix ) ) {
-	        		var query = stripped_text.substr( 0, stripped_text.length - suffix.length ).trim();
-	        		nav( "http://stackoverflow.com/search?q="+StringTools.urlEncode( "haxe "+query )+"&submit=search" );
+	        		nav( "http://stackoverflow.com/search?q="+StringTools.urlEncode( "haxe "+formatSearchSuggestionQuery( stripped_text, suffix ) )+"&submit=search" );
 	        		return;
 	        	}
 			}
@@ -334,10 +346,14 @@ class App implements IApp {
 		return ( i == -1 ) ? s : s.substr( i+1 );
 	}
 	
-	static function setDefaultSuggestion( text : String ) {
+	static function setDefaultSuggestion( ?text : String ) {
 		var desc = '<url><match>HaXe API Search</match></url>';
 		if( text != null ) desc +=  " "+text;
 		Omnibox.setDefaultSuggestion( { description : desc } );
+	}
+	
+	static function formatSearchSuggestionQuery( t : String, suffix : String ) : String {
+		return t.substr( 0, t.length - suffix.length ).trim().urlEncode();
 	}
 	
 	static function nav( url : String ) {
