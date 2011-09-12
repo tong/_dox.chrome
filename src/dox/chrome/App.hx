@@ -2,12 +2,15 @@ package dox.chrome;
 
 import haxe.rtti.CType;
 import chrome.Omnibox;
+using Lambda;
 using StringTools;
 
 class App implements IApp {
 	
+	static inline var MAX_SUGGESTION = 5;
 	static var API_DEF_REMOTE_PATH = "https://raw.github.com/tong/dox.chrome/master/";
-	//static var API_DEF_REMOTE_PATH = "http://192.168.0.110/dox.chrome/";
+ 	static var WEBSITESEARCH_SUGGESTIONS = ["haxe_wiki","haxe_ml","google_code","google_development","stackoverflow"];
+	static var HAXE_TARGETS = ["flash","js","neko","php"];
 	
 	static var fs : FileSystem;
 	static var api : haxe.rtti.XmlParser;
@@ -15,43 +18,35 @@ class App implements IApp {
 	static var actualAPIVersion : String;
 	
 	public var docpath : String;
-	public var maxSuggestions : Int;
-	public var useHaxeOrgSearch : Bool;
-	public var useGoogleCodeSearch : Bool;
-	public var useGoogleDevelopmentSearch : Bool;
-	public var useStackoverflowSearch : Bool;
-	public var useMailingListSearch : Bool;
+	public var apiVersion(default,null) : String;
+	public var haxeTargets(default,null) : Array<String>;
+	public var websiteSearchSuggestions(default,null) : Array<String>;
 	
 	function new() {
-		
-	//	LocalStorage.clear(); return;
-
-		var settings = Settings.load();
-		if( settings == null ) {
-			this.docpath = 'http://haxe.org/api/';
-			this.maxSuggestions = 10;
-			this.useHaxeOrgSearch = true;
-			this.useGoogleCodeSearch = true;
-			this.useGoogleDevelopmentSearch = true;
-			this.useStackoverflowSearch = true;
-			this.useMailingListSearch = true;
+		initExtension();
+	}
+	
+	public function initExtension() {
+	
+		var settings : TSettings = Settings.load();
+		if( settings == null ||
+			settings.websiteSearchSuggestions == null || settings.haxeTargets == null ) { // first run after upgrade to new DOX version
+			docpath = 'http://haxe.org/api/';
+			haxeTargets = HAXE_TARGETS;
+			websiteSearchSuggestions = WEBSITESEARCH_SUGGESTIONS;
 			Settings.save( this );
 		} else {
-			this.docpath = settings.docpath;
-			this.useHaxeOrgSearch = settings.useHaxeOrgSearch;
-			this.maxSuggestions = settings.maxSuggestions;
-			this.useGoogleCodeSearch = settings.useGoogleCodeSearch;
-			this.useGoogleDevelopmentSearch = settings.useGoogleDevelopmentSearch;
-			this.useStackoverflowSearch = settings.useStackoverflowSearch;
-			this.useMailingListSearch = settings.useMailingListSearch;
+			docpath = settings.docpath;
+			haxeTargets = settings.haxeTargets;
+			websiteSearchSuggestions = settings.websiteSearchSuggestions;
 		}
-		
+
 		var needAPIUpdate = true;
-		var myAPIVersion = LocalStorage.getItem( 'api_version' );
+		apiVersion = LocalStorage.getItem( 'api_version' );
 		actualAPIVersion = haxe.Http.requestUrl( API_DEF_REMOTE_PATH+"version" );
-		if( myAPIVersion != null ) {
-			trace( "Actual API version: "+actualAPIVersion +" : My API version"+ myAPIVersion );
-			if( actualAPIVersion == myAPIVersion ) {
+		if( apiVersion != null ) {
+			trace( "Actual API version: "+actualAPIVersion +" : My API version"+ apiVersion );
+			if( actualAPIVersion == apiVersion ) {
 				needAPIUpdate = false;
 			}
 		}
@@ -142,9 +137,8 @@ class App implements IApp {
 	function run() {
 		
 		trace( "Activting extension ..." );
-		
 		setDefaultSuggestion();
-
+		
 		Omnibox.onInputStarted.addListener(
 			function(){
 //				setDefaultSuggestion( "" );
@@ -181,55 +175,44 @@ class App implements IApp {
 				
 				for( t in traverser ) {
 					for( s in t ) {
-						if( suggestions.length < maxSuggestions ) {
+						if( suggestions.length < MAX_SUGGESTION ) {
 							suggestions.push( s );
 						}
 					}
 				}
 				
 				if( stripped_text.length >= 2 ) {
-					if( useHaxeOrgSearch ) {
-						suggestions.push(
-					 		{
-					 			content : stripped_text+" [Haxe.org Search]",
-					 			description : [ "Search for \"<match>", stripped_text, "</match>\" at <match><url>Haxe.org</url></match> - <url>http://haxe.org/wiki/search?s=", StringTools.urlEncode( stripped_text ), "</url>" ].join( '' )
-					 		}
-						);
+					if( suggestions.length < MAX_SUGGESTION && websiteSearchSuggestions.has( "haxe_wiki" ) ) {
+						suggestions.push( {
+					 		content : stripped_text+" [HaXe Wiki]",
+					 		description : [ "Search \"<match>", stripped_text, "</match>\" at <match><url>HaXe-Wiki</url></match> - <url>http://haxe.org/wiki/search?s=", StringTools.urlEncode(stripped_text), "</url>" ].join('')
+					 	});
 					}
-					if( useMailingListSearch ) {
-						suggestions.push(
-					 		{
-					 			content : stripped_text+" [Mailing List Search]",
-					 			description : [ "Search for \"<match>", stripped_text, "</match>\" at <match><url>Maling List Search</url></match> - <url>http%3A%2F%2Fhaxe.1354130.n2.nabble.com%2Ftemplate%2FNamlServlet.jtp%3Fmacro%3Dsearch_page%26node%3D1354130%26query%3D", StringTools.urlEncode(stripped_text), "</url>" ].join( '' )
-					 		}
-						);
+					if( suggestions.length < MAX_SUGGESTION && websiteSearchSuggestions.has( "haxe_ml" ) ) {
+						suggestions.push( {
+					 		content : stripped_text+" [HaXe Mailing List]",
+					 		description : [ "Search \"<match>", stripped_text, "</match>\" at <match><url>HaXe-MailingList</url></match> - <url>http%3A%2F%2Fhaxe.1354130.n2.nabble.com%2Ftemplate%2FNamlServlet.jtp%3Fmacro%3Dsearch_page%26node%3D1354130%26query%3D", StringTools.urlEncode(stripped_text), "</url>" ].join('')
+					 	});
 					}
-					if( useGoogleCodeSearch ) {
-						suggestions.push(
-					 		{
-					 			content : stripped_text+" [Google Code Search]",
-					 			description : [ "Search for \"<dim>haXe</dim> <match>", stripped_text, "</match> <dim>lang:haxe</dim>\" at <match><url>Google Code Search</url></match> - <url>http://www.google.com/codesearch?q=", StringTools.urlEncode( "haxe " + stripped_text + " lang:haxe"), "</url>" ].join( '' )
-					 		}
-						);
+					if( suggestions.length < MAX_SUGGESTION && websiteSearchSuggestions.has( "stackoverflow" ) ) {
+						suggestions.push( {
+					 		content : stripped_text+" [Stackoverflow]",
+					 		description : [ "Search \"<match>", stripped_text, "</match>\" at <match><url>Stackoverflow</url></match> - <url>http://stackoverflow.com/search?q=", StringTools.urlEncode(stripped_text), "</url>" ].join('')
+					 	});
 					}
-					if( useGoogleDevelopmentSearch ) {
-						suggestions.push(
-					 		{
-					 			content : stripped_text+" [Development and Coding Search]",
-					 			description : [ "Search for \"<match>", stripped_text, "</match>\" at <match><url>Develoment and Coding Search</url></match> - <url>http://www.google.com/cse?cx=005154715738920500810:fmizctlroiw&amp;q=", StringTools.urlEncode( stripped_text ), "</url>" ].join( '' )
-					 		}
-						);
+					if( suggestions.length < MAX_SUGGESTION && websiteSearchSuggestions.has( "google_code" ) ) {
+						suggestions.push( {
+					 		content : stripped_text+" [Google Code]",
+					 		description : [ "Search \"<match>", stripped_text, "</match>\" at <match><url>Google Code</url></match> - <url>http://www.google.com/codesearch?q=", StringTools.urlEncode(stripped_text), "</url>" ].join( '' )
+					 	});
 					}
-					if( useStackoverflowSearch ) {
-						suggestions.push(
-					 		{
-					 			content : stripped_text+" [Stackoverflow Search]",
-					 			description : [ "Search for \"<match>", stripped_text, "</match>\" at <match><url>Stackoverflow Search</url></match> - <url>http://stackoverflow.com/search?q=", StringTools.urlEncode( "haxe "+stripped_text ), "</url>" ].join( '' )
-					 		}
-						);
+					if( suggestions.length < MAX_SUGGESTION && websiteSearchSuggestions.has( "google_development" ) ) {
+						suggestions.push( {
+					 		content : stripped_text+" [Google development]",
+					 		description : [ "Search \"<match>", stripped_text, "</match>\" at <match><url>Google Develoment Search</url></match> - <url>http://www.google.com/cse?cx=005154715738920500810:fmizctlroiw&amp;q=", StringTools.urlEncode( stripped_text ), "</url>" ].join( '' )
+					 	});
 					}
 				}
-				
 				suggest( suggestions );
 			}
 		);
@@ -255,37 +238,31 @@ class App implements IApp {
         		    return;
         		}
         		
-        		var suffix = " [Haxe.org Search]";
+        		var suffix = " [HaXe Wiki]";
         		if( stripped_text.endsWith( suffix ) ) {
         			nav( "http://haxe.org/wiki/search?s="+formatSearchSuggestionQuery( stripped_text, suffix ) );
 					return;
         		}
-        		suffix = " [Mailing List Search]";
-	        	if( stripped_text.endsWith( suffix ) ) {
+        		if( stripped_text.endsWith( suffix = " [HaXe Mailing List]" ) ) {
 	        		nav( "http://haxe.1354130.n2.nabble.com/template/NamlServlet.jtp?macro=search_page&node=1354130&query="+formatSearchSuggestionQuery( stripped_text, suffix )  );
 	        		return;
 	        	}
-        		suffix = " [Google Code Search]";
-        		if( stripped_text.endsWith( suffix ) ) {
+	        	if( stripped_text.endsWith( suffix = " [Stackoverflow]" ) ) {
+					nav( "http://stackoverflow.com/search?q="+StringTools.urlEncode( "haxe "+formatSearchSuggestionQuery( stripped_text, suffix ) )+"&submit=search" );
+					return;
+				}
+        		if( stripped_text.endsWith( suffix = " [Google Code]" ) ) {
 					//nav( "http://www.google.com/codesearch?q="+StringTools.urlEncode( "haxe "+newquery + " lang:haxe" ) ); // does not work, google does not know lang:haxe
 					nav( "http://www.google.com/codesearch?q="+StringTools.urlEncode( "haxe "+formatSearchSuggestionQuery( stripped_text, suffix ) ) );
 					return;
 				}
-	        	suffix = " [Development and Coding Search]";
-	        	if( stripped_text.endsWith( suffix ) ) {
-	        		nav( "http://www.google.com/cse?cx=005154715738920500810:fmizctlroiw&q="+formatSearchSuggestionQuery( stripped_text, suffix ) );
-	        		return;
-	        	}
-				suffix = " [Stackoverflow Search]";
-	        	if( stripped_text.endsWith( suffix ) ) {
-	        		nav( "http://stackoverflow.com/search?q="+StringTools.urlEncode( "haxe "+formatSearchSuggestionQuery( stripped_text, suffix ) )+"&submit=search" );
-	        		return;
-	        	}
+				if( stripped_text.endsWith( suffix = " [Google development]" ) ) {
+					nav( "http://www.google.com/cse?cx=005154715738920500810:fmizctlroiw&q=haxe "+formatSearchSuggestionQuery( stripped_text, suffix ) );
+					return;
+				}
 			}
 		);
-		
 		LocalStorage.setItem( 'api_version', actualAPIVersion );
-		
 		trace( "Extension active, use it!" );
 	}
 	
@@ -319,8 +296,27 @@ class App implements IApp {
 	}
 	
 	function addTypeSuggestion( term : String, t : { path : String, doc : String }, level : Int = 0 ) : Bool {
-		var name = getTypeName( t.path );
-		return if( name.toLowerCase().startsWith( term ) ) {
+		var i = t.path.lastIndexOf( "." );
+		//return ( i == -1 ) ? s : s.substr( i+1 );
+		var name = ( i == -1 ) ? t.path : t.path.substr( i+1 );
+		//var name = getTypeName( t.path );
+		if( name.toLowerCase().startsWith( term ) ) {
+			
+			// filter haxe target
+			var i = t.path.indexOf( "." );
+			if( i != -1 ) {
+				var target = t.path.substr( 0, i );
+				var targetOk = false;
+				for( t in haxeTargets ) {
+					if( t == target ) {
+						targetOk = true;
+						break;
+					}
+				}
+				if( !targetOk )
+					return false;
+			}
+		
 			var path = t.path.split( "." ).join( "/" ).toLowerCase();
 			if( path.startsWith( "flash" ) ) // hacking flash9 target path
 				path = "flash9"+path.substr(5);
@@ -337,14 +333,16 @@ class App implements IApp {
 				content : url,
 				description: description
 			} );
-			true;
-		} else false;
+			return true;
+		} else return false;
 	}
 	
+	/* 
 	static function getTypeName( s : String ) : String  {
 		var i = s.lastIndexOf( "." );
 		return ( i == -1 ) ? s : s.substr( i+1 );
 	}
+	*/
 	
 	static function setDefaultSuggestion( ?text : String ) {
 		var desc = '<url><match>HaXe API Search</match></url>';

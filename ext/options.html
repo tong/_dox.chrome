@@ -1,100 +1,27 @@
-<html>
+<!DOCTYPE html>
+<html i18n-values="dir:textdirection">
 <head>
-<title>dox-settings</title>
-<link rel="icon" href="icons/icon_16.png">
-<style type="text/css">
-* {
-	margin: 0px;
-	padding: 0px;
-}
-body {
-	display: block;
-	font-family: "trebuchet ms", sans-serif, arial;
-	font-size: 10.5pt;
-}
-button {
-	display: inline-block;
-	background-color: #4B8DF9;
-	border: 1px solid #2F5BB7;
-	border-radius: 2px;
-	border-collapse: separate;
-	border-spacing: 2px;
-	box-shadow: inset 0px 1px 8px rgba(0, 0, 0, 0.1);
-	font-size: small;
-	font-family: "trebuchet ms", sans-serif, arial;
-	text-align: center;
-	color: #fff;
-	padding: 6px 10px;
-	-webkit-user-select: none;
-	cursor: pointer;
-}
-button:hover {
-	background-color: #357AE8;
-	background-image: -webkit-linear-gradient(top,#4D90FE,#357AE8);
-	border: 1px solid #2F5BB7;
-	box-shadow: inset 0px 1px 8px rgba(0, 0, 0, 0.1);
-}
-
-#info {
-	background: #ccc;
-	width: 100%;
-	padding: 10px;
-}
-
-#header {
-	padding: 6px 10px 6px 10px;
-}
-#header #icon {
-	float: left;
-}
-#header #title {
-	margin-left: 8px;
-	font-size: 25px;
-	font-weight: bold;
-}
-.block {
-	padding: 10px 10px 14px 18px;
-	margin-bottom: 1px;
-	background-color: #eee;
-}
-.block .title {
-	font-size: 20px;
-	color: #09598A;
-}
-</style>
+<meta charset="utf-8">
+<title id="title"></title>
+<link id="favicon" rel="icon">
+<link rel="stylesheet" href="css/options.css" media="screen">
 <script src="jquery.js"></script>
 <script src="options.js"></script>
-<script>$(dox.chrome.Options.init);</script>
+<script type="text/javascript">$(dox.chrome.Options.init);</script>
 </head>
 <body>
 
-<div id="ui">
-	
-	<div id="info"></div>
-	<div id="header"><img id="icon" src="icons/icon_32.png"/><span id="title">dox.settings</span></div>
-	
-	<div class="block">
-		<button id="btn_loadapi"><div>Reload API description</div></button>
-	</div>
-	
-	<div class="block">
-		
-		<!-- 
-		<div>Doc path: <input type="url" id="docpath" value="wtf"></div>
-		<div>Max suggestions: <span id="maxsuggestions_display"></span><input type="range" id="maxsuggestions" min="1" max="100" step="1" value="10"></div>
-		-->
-		
-		<div>
-			<div>Suggest searches on the following websites if nothing is found in the haXe API</div>
-			<div><input type="checkbox" id="haxeorgsearch"/> <span>HaXe wiki</span></div>
-			<div><input type="checkbox" id="mailinglistsearch"/> <span>HaXe mailing list</span></div>
-			<div><input type="checkbox" id="googlecodesearch"/> <span>Google code</span></div>
-			<div><input type="checkbox" id="googledevelopmentsearch"/> <span>Google development</span></div>
-			<div><input type="checkbox" id="stackoverflowsearch"/> <span>Stackoverflow</span></div>
-		</div>
-		
-	</div>
-	
+<div id="sidebar">
+	<img id="icon" src="icons/icon_48.png"/>
+	<div id="sidebar-title"></div>
+	<input id="search" type="search" placeholder="">
+	<div id="tablist"></div>
 </div>
+
+<div id="content">
+	<div id="title"></div>
+	<div id="groups"></div>
+</div>
+
 </body>
 </html>

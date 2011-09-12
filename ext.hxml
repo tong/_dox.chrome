@@ -4,15 +4,16 @@
 -cp ../chrome.extension
 -js ext/app.js
 dox.chrome.App
---no-traces
-#-D DEBUG
+#--no-traces
+-D DEBUG
 
 --next
 -cp src
 -cp ../hx.html5
 -cp ../chrome.extension
+-cp ../chrome.extension.ui
 -js ext/options.js
 dox.chrome.Options
---no-traces
+#--no-traces
 -D noEmbedJS
-#-D DEBUG
+-D DEBUG
