@@ -32,6 +32,7 @@ class Options {
 								{ id : "reload_api_description", type : "button", btn_label : "Reload" },
 							]
 						},
+						/*
 						{
 							id : "haxe_targets",
 							label : "HaXe targets",
@@ -44,6 +45,7 @@ class Options {
 								{ id : "haxetarget_php", type : "checkbox", label : "PHP" }
 							]
 						},
+						*/
 						{
 							id : "search_suggestions",
 							label : "Website search suggestions",

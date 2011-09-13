@@ -273,12 +273,29 @@ class App implements IApp {
 			case TPackage(name,full,subs) :
 				if( name.fastCodeAt(0) == 95 ) // "_"
 					continue;
+				
+				// filter haxe target
+				/*
+				var filter = false;
+				for( t in haxeTargets ) {
+					var i = full.indexOf( t );
+					if( i == -1 ) {
+						filter = true;
+					}
+				}
+				if( filter ) {
+					trace("Filtered "+full );
+					continue;
+				}
+				*/
+				
 				var parts = full.split( "." );
 				for( p in parts ) {
 					if( p == term ) {
+						var url =  docpath + full.split( "." ).join( "/" ).toLowerCase();
 						traverser[3].push( {
-							content : docpath + full.split( "." ).join( "/" ).toLowerCase(),
-							description : full
+							content : url,
+							description : "<match>"+full+"</match> <url>("+url+")</url>"
 						} );
 					}
 				}
@@ -295,6 +312,24 @@ class App implements IApp {
 		}
 	}
 	
+	/*
+	function isTargetAllowed( path : String ) : Bool {
+		var i = path.indexOf( "." );
+		if( i != -1 ) {
+			var target = path.substr( 0, i );
+			var targetOk = false;
+			for( t in haxeTargets ) {
+				if( t == target ) {
+					targetOk = true;
+					return true;
+					break;
+				}
+			}
+		}
+		return false;
+	}
+	*/
+	
 	function addTypeSuggestion( term : String, t : { path : String, doc : String }, level : Int = 0 ) : Bool {
 		var i = t.path.lastIndexOf( "." );
 		//return ( i == -1 ) ? s : s.substr( i+1 );
@@ -303,6 +338,7 @@ class App implements IApp {
 		if( name.toLowerCase().startsWith( term ) ) {
 			
 			// filter haxe target
+			/*
 			var i = t.path.indexOf( "." );
 			if( i != -1 ) {
 				var target = t.path.substr( 0, i );
@@ -316,6 +352,10 @@ class App implements IApp {
 				if( !targetOk )
 					return false;
 			}
+			if( !isTargetAllowed( t.path ) ) {
+				return false;
+			}
+			*/
 		
 			var path = t.path.split( "." ).join( "/" ).toLowerCase();
 			if( path.startsWith( "flash" ) ) // hacking flash9 target path

@@ -14,6 +14,6 @@ dox.chrome.App
 -cp ../chrome.extension.ui
 -js ext/options.js
 dox.chrome.Options
-#--no-traces
 -D noEmbedJS
 -D DEBUG
+#--no-traces
