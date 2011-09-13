@@ -32,25 +32,24 @@ class Options {
 								{ id : "reload_api_description", type : "button", btn_label : "Reload" },
 							]
 						},
-						/*
 						{
 							id : "haxe_targets",
-							label : "HaXe targets",
+							label : "Target filter",
 							content : [
 								{ id : "haxetarget_description", type : "description", content : "Turn on/off haXe targets to search." },
 								//{ id : "haxetarget_cpp", type : "checkbox", label : "CPP" },
-								{ id : "haxetarget_flash", type : "checkbox", label : "Flash" },
-								{ id : "haxetarget_js", type : "checkbox", label : "Javascript" },
-								{ id : "haxetarget_neko", type : "checkbox", label : "Neko" },
-								{ id : "haxetarget_php", type : "checkbox", label : "PHP" }
+								{ id : "haxetarget_haxe", type : "checkbox", label : "haxe.*" },
+								{ id : "haxetarget_flash", type : "checkbox", label : "flash.*" },
+								{ id : "haxetarget_js", type : "checkbox", label : "js.*" },
+								{ id : "haxetarget_neko", type : "checkbox", label : "neko.*" },
+								{ id : "haxetarget_php", type : "checkbox", label : "php.*" }
 							]
 						},
-						*/
 						{
 							id : "search_suggestions",
 							label : "Website search suggestions",
 							content : [
-								{ id : "websitesearch_description", type : "description", content : "Show search suggestions for these websites if your query is not found in the API." },
+								{ id : "websitesearch_description", type : "description", content : "Show search suggestions if your query is not found in the API." },
 								{ id : "websitesearch_haxe_wiki", type : "checkbox", label : "HaXe wiki" },
 								{ id : "websitesearch_haxe_ml", type : "checkbox", label : "HaXe mailing list" },
 								{ id : "websitesearch_google_development", type : "checkbox", label : "Google development" },
@@ -60,7 +59,7 @@ class Options {
 						},
 						{
 							id : "reset",
-							label : "Reset settings",
+							label : "Reset",
 							content : [
 								{ type : "description", content : "Reset to default settings." },
 								{ id : "reset", type : "button", btn_label : "Reset" }

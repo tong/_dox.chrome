@@ -10,7 +10,7 @@ class App implements IApp {
 	static inline var MAX_SUGGESTION = 5;
 	static var API_DEF_REMOTE_PATH = "https://raw.github.com/tong/dox.chrome/master/";
  	static var WEBSITESEARCH_SUGGESTIONS = ["haxe_wiki","haxe_ml","google_code","google_development","stackoverflow"];
-	static var HAXE_TARGETS = ["flash","js","neko","php"];
+	static var HAXE_TARGETS = ["haxe","flash","js","neko","php"];
 	
 	static var fs : FileSystem;
 	static var api : haxe.rtti.XmlParser;
@@ -275,21 +275,10 @@ class App implements IApp {
 					continue;
 				
 				// filter haxe target
-				/*
-				var filter = false;
-				for( t in haxeTargets ) {
-					var i = full.indexOf( t );
-					if( i == -1 ) {
-						filter = true;
-					}
-				}
-				if( filter ) {
-					trace("Filtered "+full );
-					continue;
-				}
-				*/
-				
 				var parts = full.split( "." );
+				if( !haxeTargets.has( parts[0] ) )
+					continue;
+					
 				for( p in parts ) {
 					if( p == term ) {
 						var url =  docpath + full.split( "." ).join( "/" ).toLowerCase();
@@ -338,24 +327,11 @@ class App implements IApp {
 		if( name.toLowerCase().startsWith( term ) ) {
 			
 			// filter haxe target
-			/*
 			var i = t.path.indexOf( "." );
 			if( i != -1 ) {
-				var target = t.path.substr( 0, i );
-				var targetOk = false;
-				for( t in haxeTargets ) {
-					if( t == target ) {
-						targetOk = true;
-						break;
-					}
-				}
-				if( !targetOk )
+				if( !haxeTargets.has( t.path.substr( 0, i ) ) )
 					return false;
 			}
-			if( !isTargetAllowed( t.path ) ) {
-				return false;
-			}
-			*/
 		
 			var path = t.path.split( "." ).join( "/" ).toLowerCase();
 			if( path.startsWith( "flash" ) ) // hacking flash9 target path
