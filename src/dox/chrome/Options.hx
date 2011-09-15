@@ -26,7 +26,7 @@ class Options {
 					groups : [
 						{
 							id : "api",
-							label : "API Description",
+							label : "API description",
 							content : [
 								{ type : "description", content : "Current haXe API version used: "+app.apiVersion },
 								{ id : "reload_api_description", type : "button", btn_label : "Reload" },
@@ -34,15 +34,18 @@ class Options {
 						},
 						{
 							id : "haxe_targets",
-							label : "Target filter",
+							label : "API search settings",
 							content : [
-								{ id : "haxetarget_description", type : "description", content : "Turn on/off haXe targets to search." },
+								{ id : "haxetarget_description", type : "description", content : "Toggle haXe targets to search." },
 								//{ id : "haxetarget_cpp", type : "checkbox", label : "CPP" },
 								{ id : "haxetarget_haxe", type : "checkbox", label : "haxe.*" },
 								{ id : "haxetarget_flash", type : "checkbox", label : "flash.*" },
 								{ id : "haxetarget_js", type : "checkbox", label : "js.*" },
 								{ id : "haxetarget_neko", type : "checkbox", label : "neko.*" },
-								{ id : "haxetarget_php", type : "checkbox", label : "php.*" }
+								{ id : "haxetarget_php", type : "checkbox", label : "php.*" },
+								{ type : "margin", value : "16" },
+								{ type : "description", content : "Toggle field/method search." },
+								{ id : "search_inner", type : "checkbox", label : "Also search fields and methods" },
 							]
 						},
 						{
@@ -84,14 +87,14 @@ If a completion cannot be found, several search suggestions will be provided, in
 							id : "source",
 							label : "Source code",
 							content : [
-								{ id : "source", type : "description", content : "<p>The DOX project is open source, written in <a href='http://haxe.org' target='_blank'>haXe</a> and licensed under <a href='http://www.gnu.org/licenses/gpl-3.0.txt' target='_blank'>GPL 3.0</a>.<br>
+								{ id : "source", type : "description", content : "<p>DoX is open source, written in <a href='http://haxe.org' target='_blank'>haXe</a> and licensed under <a href='http://www.gnu.org/licenses/gpl-3.0.txt' target='_blank'>GPL 3.0</a>.<br>
 You can grab the source code from <a href='https://github.com/tong/dox.chrome' target='_blank'>github</a>.</p>" }
 							]
 						},
 						{
 							id : "author",
 							content : [
-								{ id : "author", type : "description", content : "<p>DOX is created by <a href='http://disktree.net' target='_blank'>disktree.net</a>.<br>
+								{ id : "author", type : "description", content : "<p>DoX is created by <a href='http://disktree.net' target='_blank'>disktree.net</a>.<br>
 Drop us a <a href='mailto:sdk@disktree.net'>mail</a> for anything on your mind.</p>" }
 							]
 						}
@@ -127,6 +130,11 @@ Drop us a <a href='mailto:sdk@disktree.net'>mail</a> for anything on your mind.<
 				j( '#reload_api_description' ).hide();
 				haxe.Timer.delay( function(){
 					app.updateAPI( function(err){
+						if( err != null ) {
+							showDesktopNotification( "DoX-ERROR!", "Failed to reload API description ("+err+")" );
+						} else {
+							showDesktopNotification( "DoX", "API description successfully reloaded", 3200 );
+						}
 						j( '#reload_api_description' ).show();
 					});
 				}, 1 );
@@ -172,6 +180,13 @@ Drop us a <a href='mailto:sdk@disktree.net'>mail</a> for anything on your mind.<
 		}
 		
 		chrome.ui.Options.init( root );
+	}
+	
+	static function showDesktopNotification( title : String, body : String, time : Int = -1 ) {
+		var n = NotificationCenter.createNotification( "icons/icon_48.png", title, body );
+		n.show();
+		if( time > 0 )
+			haxe.Timer.delay( n.cancel, time );
 	}
 	
 	static inline function j( id : Dynamic ) : js.JQuery { return new js.JQuery( id ); }

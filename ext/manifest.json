@@ -15,6 +15,7 @@
 	"permissions": [
 		"tabs",
 		"unlimitedStorage",
+		"notifications",
 		"https://raw.github.com/",
 		"http://haxe.org/"
 	]
