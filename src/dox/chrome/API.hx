@@ -14,7 +14,8 @@ class API {
 	public static function main() {
 	
 		// generate xml files here (?)
-	
+		//TODO generate here .. do not use the hxml files
+		
 		var timestamp = haxe.Timer.stamp();
 		log( "Generating type description file for targets: "+targets );
 		var parser = new haxe.rtti.XmlParser();

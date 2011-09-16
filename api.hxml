@@ -1,11 +1,12 @@
 
-api/_haxe.hxml
-api/_js.hxml
--js temp.js
---no-output
--xml api/js.xml
+#--macro haxe.macro.Compiler.exclude('haxe.Int32')
+#api/_haxe.hxml
+#api/_js.hxml
+#-js temp.js
+#--no-output
+#-xml api/js.xml
 
---next
+#--next
 api/_haxe.hxml
 api/_flash.hxml
 -swf temp.swf

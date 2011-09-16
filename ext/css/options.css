@@ -111,6 +111,8 @@ input[type='submit'][disabled]:hover {
 }
 #sidebar #tablist {
 }
+
+#search-item,
 #sidebar #tablist .item {
 	display: block;
 	outline: none;
@@ -128,7 +130,6 @@ input[type='submit'][disabled]:hover {
 	color: black;
 	text-shadow: #BBCEE9 0 1px 1px;
 }
-
 
 
 /* ----- CONTENT ----- */

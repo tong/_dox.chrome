@@ -18,7 +18,10 @@ class Options {
 		
 		//var root : chrome.ui.options.manifest.Root = {
 		var root = {
-			name : "DoX", icon : "icon/icon_32.png", search : false,
+			name : "DoX",
+			icon : "icons/icon_48.png",
+			search : true,
+			helpUrl : "http://dox.disktree.net/", //TODO
 			tabs : [
 				{
 					id : "settings",
@@ -42,10 +45,12 @@ class Options {
 								{ id : "haxetarget_flash", type : "checkbox", label : "flash.*" },
 								{ id : "haxetarget_js", type : "checkbox", label : "js.*" },
 								{ id : "haxetarget_neko", type : "checkbox", label : "neko.*" },
-								{ id : "haxetarget_php", type : "checkbox", label : "php.*" },
+								{ id : "haxetarget_php", type : "checkbox", label : "php.*" }
+								/*
 								{ type : "margin", value : "16" },
 								{ type : "description", content : "Toggle field/method search." },
 								{ id : "search_inner", type : "checkbox", label : "Also search fields and methods" },
+								*/
 							]
 						},
 						{
@@ -79,7 +84,7 @@ class Options {
 						//	label : "DOX Info",
 							content : [
 								{ id : "any", type : "description", content : "This extension integrates with the Chrome omnibox to bring haXe (<a href='http://haxe.org'>http://haxe.org</a>) standard library API autocompletion right to your fingertips.
-To use, type <b>hx</b>, followed by a space or tab, followed by your query. The first time you use the extension, there may be some delay, as the API description is retrieved remotely and cached locally. On subsequent uses, however, you should see instantaneous autocompletions. Selecting a completion or fully typing a class, enum or typedef name and then pressing enter will take you directly to the relevant documentation.<br>
+To use, type <b>hx</b>, followed by a space or tab, followed by your query. The first time you use the extension, there may be some delay, as the API description is retrieved remotely and cached locally. On subsequent uses, however, you should see instantaneous autocompletions. Selecting a completion or fully typing a class, enum or typedef name and then pressing enter will take you directly to the relevant documentation.
 If a completion cannot be found, several search suggestions will be provided, including Google Codesearch, Stackoverflow and others." }
 							]
 						},
@@ -167,6 +172,9 @@ Drop us a <a href='mailto:sdk@disktree.net'>mail</a> for anything on your mind.<
 						app.haxeTargets.remove( _id );
 					}
 					Settings.save( app );
+					if( app.haxeTargets.length == 0 ) {
+						showDesktopNotification( "DoX-WARNING!", "You just deactivated all haXe targets, no suggestion for API search will be shown!", 5200 );
+					}
 				} else if( id.startsWith( 'checkbox_websitesearch' ) ) {
 					var _id = id.substr( 23 );
 					if( params ) {

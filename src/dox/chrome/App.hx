@@ -9,6 +9,7 @@ class App implements IApp {
 	
 	static inline var MAX_SUGGESTION = 5;
 	static var API_DEF_REMOTE_PATH = "https://raw.github.com/tong/dox.chrome/master/";
+	//static var API_DEF_REMOTE_PATH = "http://192.168.0.110/dox.chrome/";
  	static var WEBSITESEARCH_SUGGESTIONS = ["haxe_wiki","haxe_ml","google_code","google_development","stackoverflow"];
 	static var HAXE_TARGETS = ["haxe","flash","js","neko","php"];
 	
@@ -40,7 +41,10 @@ class App implements IApp {
 			haxeTargets = settings.haxeTargets;
 			websiteSearchSuggestions = settings.websiteSearchSuggestions;
 		}
-
+		trace( "Active haXe targets: "+haxeTargets );
+		if( haxeTargets.length == 0 ) {
+			showDesktopNotification( "DoX-WARNING!", "All haXe targets are deactivated! No suggestions for API search will be shown! Go to the extension settings menu to activate at least one", 5200 );
+		}
 		var needAPIUpdate = true;
 		apiVersion = LocalStorage.getItem( 'api_version' );
 		actualAPIVersion = haxe.Http.requestUrl( API_DEF_REMOTE_PATH+"version" );
@@ -131,7 +135,7 @@ class App implements IApp {
 	}
 	
 	#if DEBUG
-	public function log( v : Dynamic, ?inf : haxe.PosInfos ) { haxe.Log.trace( v, inf ); }
+	public function log( v : Dynamic, ?inf : haxe.PosInfos ) haxe.Log.trace( v, inf )
 	#end
 	
 	function run() {
@@ -171,7 +175,7 @@ class App implements IApp {
 				var suggestions = new Array<SuggestResult>();
 				traverser = new Array<Array<SuggestResult>>();
 				for( i in 0... 4 ) traverser.push( new Array<SuggestResult>() );
-				searchSuggestions( api.root, term );
+				searchTypeSuggestions( api.root, term );
 				
 				for( t in traverser ) {
 					for( s in t ) {
@@ -180,6 +184,59 @@ class App implements IApp {
 						}
 					}
 				}
+				
+				//TODO search fields/methods
+				/*
+				if( suggestions.length < MAX_SUGGESTION ) {
+					//TODO
+					trace("SEARCH public FIELDS/METHODS............. "+term );
+					
+					for( tree in api.root ) {
+						switch( tree ) {
+						case TPackage(name,full,subs) : // do nothing
+						case TTypedecl(t) :
+							//trace(t);
+							if( t.isPrivate )
+								continue;
+							var type = t.type;
+							switch( type ) {
+							case CAnonymous(fields) : 	//case CAnonymous(fields : List<{ t : CType, name : String}>) :
+								//TODO
+								if( fields.length == 0 )
+									continue;
+								var _fields : Iterable<{t:CType,name:String}> = untyped fields.q;
+								for( f in _fields ) {
+									if( f.name.indexOf( term ) != -1 ) {
+										var path = t.path.split( "." ).join( "/" ).toLowerCase();
+										var url = docpath + path;
+										var i = t.path.lastIndexOf( "." );
+										var name = ( i == -1 ) ? t.path : t.path.substr( i+1 );
+										name += "->"+f.name;
+										var description =  "<match>"+name+"</match>";
+										suggestions.push({
+											content : url,
+											description : description
+										});
+										break;
+									}
+								}
+							default :
+							}
+						case TEnumdecl(e) :
+							//trace(e);
+						case TClassdecl(c) :
+							if( c.isPrivate )
+								continue;
+						}
+					}
+					
+					//trace("SEARCH private FIELDS/METHODS............. "+term );
+					///.........
+					
+					// TODO search docs text too
+					///..........
+				}
+				*/
 				
 				if( stripped_text.length >= 2 ) {
 					if( suggestions.length < MAX_SUGGESTION && websiteSearchSuggestions.has( "haxe_wiki" ) ) {
@@ -218,7 +275,7 @@ class App implements IApp {
 		);
 		
 		Omnibox.onInputEntered.addListener(
-			function(text) {
+			function(text:String) {
 				//trace( "Input entered: '"+text+"'" );
 				if( text == null ) {
 					nav( docpath );
@@ -263,32 +320,26 @@ class App implements IApp {
 			}
 		);
 		LocalStorage.setItem( 'api_version', actualAPIVersion );
-		trace( "Extension active, use it!" );
+		trace( "DoX active, use it!" );
 	}
 	
-	function searchSuggestions( root : Array<TypeTree>, term : String ) {
+	function searchTypeSuggestions( root : Array<TypeTree>, term : String ) {
 		//trace( "SEARCH: "+term, "info" );
 		for( tree in root ) {
 			switch( tree ) {
 			case TPackage(name,full,subs) :
 				if( name.fastCodeAt(0) == 95 ) // "_"
 					continue;
-				
-				// filter haxe target
 				var parts = full.split( "." );
-				if( !haxeTargets.has( parts[0] ) )
-					continue;
-					
 				for( p in parts ) {
 					if( p == term ) {
-						var url =  docpath + full.split( "." ).join( "/" ).toLowerCase();
 						traverser[3].push( {
-							content : url,
-							description : "<match>"+full+"</match> <url>("+url+")</url>"
+							content : docpath + full.split( "." ).join( "/" ).toLowerCase(),
+							description : full
 						} );
 					}
 				}
-				searchSuggestions( subs, term );
+				searchTypeSuggestions( subs, term );
 			case TTypedecl(t) :
 				addTypeSuggestion( term, t );
 			case TEnumdecl(e) :
@@ -301,24 +352,6 @@ class App implements IApp {
 		}
 	}
 	
-	/*
-	function isTargetAllowed( path : String ) : Bool {
-		var i = path.indexOf( "." );
-		if( i != -1 ) {
-			var target = path.substr( 0, i );
-			var targetOk = false;
-			for( t in haxeTargets ) {
-				if( t == target ) {
-					targetOk = true;
-					return true;
-					break;
-				}
-			}
-		}
-		return false;
-	}
-	*/
-	
 	function addTypeSuggestion( term : String, t : { path : String, doc : String }, level : Int = 0 ) : Bool {
 		var i = t.path.lastIndexOf( "." );
 		//return ( i == -1 ) ? s : s.substr( i+1 );
@@ -329,7 +362,15 @@ class App implements IApp {
 			// filter haxe target
 			var i = t.path.indexOf( "." );
 			if( i != -1 ) {
-				if( !haxeTargets.has( t.path.substr( 0, i ) ) )
+				var target = t.path.substr( 0, i );
+				var targetOk = false;
+				for( t in haxeTargets ) {
+					if( t == target ) {
+						targetOk = true;
+						break;
+					}
+				}
+				if( !targetOk )
 					return false;
 			}
 		
@@ -374,10 +415,16 @@ class App implements IApp {
 		chrome.Tabs.getSelected( null, function(tab) { chrome.Tabs.update( tab.id, { url: url } ); });
 	}
 	
+	static function showDesktopNotification( title : String, body : String, time : Int = -1 ) {
+		var n = NotificationCenter.createNotification( "icons/icon_48.png", title, body );
+		n.show();
+		if( time > 0 ) haxe.Timer.delay( n.cancel, time );
+	}
+	
 	static function init() : IApp {
 		#if DEBUG
 		if( haxe.Firebug.detect() ) haxe.Firebug.redirectTraces();	
-		trace( "DOX.chrome" );
+		trace( "DoX.chrome" );
 		#end
 		return new App();
 	}

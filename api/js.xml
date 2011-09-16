@@ -8006,7 +8006,7 @@
 		<toString public="1" set="method" line="43"><f a=""><c path="String"/></f></toString>
 		<new public="1" set="method" line="32"><f a=""><e path="Void"/></f></new>
 	</class>
-	<class path="haxe.Int32" params="" file="/usr/lib/haxe/std/haxe/Int32.hx">
+	<class path="haxe.Int32" params="" file="/usr/lib/haxe/std/haxe/Int32.hx" extern="1">
 		<make public="1" get="inline" set="null" line="29" static="1"><f a="a:b">
 	<c path="Int"/>
 	<c path="Int"/>
