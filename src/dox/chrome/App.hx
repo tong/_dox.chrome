@@ -11,8 +11,8 @@ class App implements IApp {
 	static inline var DOCPATH_LOCAL = "DoX:";
 	static inline var MAX_SUGGESTION = 5;
 	
-	//static var API_DEF_REMOTE_PATH = "https://raw.github.com/tong/dox.chrome/master/";
-	static var API_DEF_REMOTE_PATH = "http://192.168.0.110/dox.chrome/";
+	static var API_DEF_REMOTE_PATH = "https://raw.github.com/tong/dox.chrome/master/";
+	//static var API_DEF_REMOTE_PATH = "http://192.168.0.110/dox.chrome/";
  	static var WEBSITESEARCH_SUGGESTIONS = ["haxe_wiki","haxe_ml","google_code","google_development","stackoverflow"];
 	static var HAXE_TARGETS = ["haxe","flash","js","neko","php"];
 	
@@ -140,6 +140,7 @@ class App implements IApp {
 					trace( 'File removed.' );
 				});
 			});
+			return;
 			*/
 			
 			if( needAPIUpdate ) {
@@ -161,7 +162,9 @@ class App implements IApp {
 					fe.file(function(file){
 						var r = new FileReader();
 						r.onloadend = function(e) {
-							var data = r.result;
+							//trace("------------------------------------------------------");
+							//trace(r.result);
+							//var data = r.result;
 							api = JSON.parse( r.result );
 							me.run();
 						}
@@ -186,6 +189,35 @@ class App implements IApp {
 		trace( "Updating API ("+API_DEF_REMOTE_PATH+")");
 		//TODO update the api in case we don't have one or if a newer (haxe version) is available
 		var me = this;
+		var worker = new Worker("worker/http_get.js");
+		worker.onmessage = function(e) {
+			if( e == null ) {
+				//TODO handle error
+				return;
+			}
+			api = JSON.parse( e.data );
+			trace( "API file loaded" );
+			App.fs.root.getFile( 'api', {create:true}, function(fe:FileEntry) {
+				fe.createWriter(function(fw) {
+					fw.onwriteend = function(e) {
+						trace( "API file written to local file system");
+						me.run();
+						if( cb != null ) cb( null );
+					}
+					fw.onerror = function(e) {
+						trace( 'Failed to write into local file system: '+e.toString());
+						//if( active ) { TODO }
+						if( cb != null ) cb( e.toString() );
+					}
+					var bb = new BlobBuilder();
+					bb.append( e.data );
+					//bb.append( JSON.stringify(api) );
+					fw.write( bb.getBlob('text/plain') );
+				});
+			});
+		}
+		worker.postMessage( API_DEF_REMOTE_PATH+"haxe_api" );
+		/*
 		var data = haxe.Http.requestUrl( API_DEF_REMOTE_PATH+"haxe_api" );
 		api = JSON.parse( data );
 		trace( "API file loaded" );
@@ -206,6 +238,7 @@ class App implements IApp {
 				fw.write( bb.getBlob('text/plain') );
 			});
 		});
+		*/
 	}
 	
 	#if DEBUG
@@ -514,7 +547,7 @@ class App implements IApp {
 	}
 	
 	static function showDesktopNotification( title : String, body : String, time : Int = -1 ) {
-		var n = NotificationCenter.createNotification( "icons/icon_48.png", title, body );
+		var n = NotificationCenter.createNotification( "img/icon_48.png", title, body );
 		n.show();
 		if( time > 0 ) haxe.Timer.delay( n.cancel, time );
 	}
