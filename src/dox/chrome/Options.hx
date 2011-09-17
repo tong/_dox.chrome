@@ -13,13 +13,14 @@ class Options {
 		
 		#if DEBUG
 		haxe.Log.trace = mytrace;
-		trace( "DOX.options" );
+		trace( "DoX.options" );
 		#end
 		
 		//var root : chrome.ui.options.manifest.Root = {
 		var root = {
 			name : "DoX",
-			icon : "icons/icon_48.png",
+			favicon : "img/icon_48.png",
+			icon : "img/icon_48.png",
 			search : true,
 			helpUrl : "http://dox.disktree.net/", //TODO
 			tabs : [
@@ -73,6 +74,16 @@ class Options {
 								{ id : "reset", type : "button", btn_label : "Reset" }
 							]
 						}
+						/*
+						{
+							id : "pin",
+							label : "Pin Tab",
+							content : [
+								{ type : "description", content : "Pin a tab as view" },
+								{ id : "pin", type : "button", btn_label : "Pin Tab" }
+							]
+						}
+						*/
 					] 
 				},
 				{
@@ -83,24 +94,29 @@ class Options {
 							id : "info",
 						//	label : "DOX Info",
 							content : [
-								{ id : "any", type : "description", content : "This extension integrates with the Chrome omnibox to bring haXe (<a href='http://haxe.org'>http://haxe.org</a>) standard library API autocompletion right to your fingertips.
+								{ id : "any", type : "description", content : "This extension integrates with the Chrome omnibox to bring <a href='http://haxe.org' title='http://haxe.org'>haXe</a> standard library API autocompletion right to your fingertips.
 To use, type <b>hx</b>, followed by a space or tab, followed by your query. The first time you use the extension, there may be some delay, as the API description is retrieved remotely and cached locally. On subsequent uses, however, you should see instantaneous autocompletions. Selecting a completion or fully typing a class, enum or typedef name and then pressing enter will take you directly to the relevant documentation.
 If a completion cannot be found, several search suggestions will be provided, including Google Codesearch, Stackoverflow and others." }
+							]
+						},
+						{
+							id : "install",
+							content : [
+								{ id : "author", type : "description", content : "<p>Download/Install latest version of DoX from the <a href='https://chrome.google.com/webstore/detail/oocmdgebgfalcjefajhpkdkmlfcanljg' target='_blank'>chrome web store</a>.</p>" }
 							]
 						},
 						{
 							id : "source",
 							label : "Source code",
 							content : [
-								{ id : "source", type : "description", content : "<p>DoX is open source, written in <a href='http://haxe.org' target='_blank'>haXe</a> and licensed under <a href='http://www.gnu.org/licenses/gpl-3.0.txt' target='_blank'>GPL 3.0</a>.<br>
-You can grab the source code from <a href='https://github.com/tong/dox.chrome' target='_blank'>github</a>.</p>" }
+								{ id : "source", type : "description", content : "<p>DoX is open source, written in <a href='http://haxe.org' title='http://haxe.org' target='_blank'>haXe</a> and licensed under <a href='http://www.gnu.org/licenses/gpl-3.0.txt' title='http://www.gnu.org/licenses/gpl-3.0.txt' target='_blank'>GPL 3.0</a>.<br>
+You can pull/fork the source code from <a href='https://github.com/tong/dox.chrome' title='https://github.com/tong/dox.chrome' target='_blank'>github</a>.</p>" }
 							]
 						},
 						{
 							id : "author",
 							content : [
-								{ id : "author", type : "description", content : "<p>DoX is created by <a href='http://disktree.net' target='_blank'>disktree.net</a>.<br>
-Drop us a <a href='mailto:sdk@disktree.net'>mail</a> for anything on your mind.</p>" }
+								{ id : "author", type : "description", content : "<p>DoX is created by <a href='http://disktree.net' title='http://disktree.net' target='_blank'>disktree.net</a>.</p>" }
 							]
 						}
 					]
@@ -130,7 +146,6 @@ Drop us a <a href='mailto:sdk@disktree.net'>mail</a> for anything on your mind.<
 		}
 		chrome.ui.Options.onUserInteraction = function(id:String,?params:Dynamic){
 			switch( id ) {
-			
 			case 'reload_api_description' :
 				j( '#reload_api_description' ).hide();
 				haxe.Timer.delay( function(){
@@ -143,7 +158,6 @@ Drop us a <a href='mailto:sdk@disktree.net'>mail</a> for anything on your mind.<
 						j( '#reload_api_description' ).show();
 					});
 				}, 1 );
-				
 			case "reset" :
 				LocalStorage.clear();
 				j( '#reload_api_description' ).hide();
@@ -161,6 +175,9 @@ Drop us a <a href='mailto:sdk@disktree.net'>mail</a> for anything on your mind.<
 						});
 					});
 				}, 1 );
+			case 'pin' :
+				trace("PIN THE TAB");
+				app.pinned = true;
 				
 			default :
 				if( id.startsWith( 'checkbox_haxetarget' ) ) {
@@ -197,7 +214,7 @@ Drop us a <a href='mailto:sdk@disktree.net'>mail</a> for anything on your mind.<
 			haxe.Timer.delay( n.cancel, time );
 	}
 	
-	static inline function j( id : Dynamic ) : js.JQuery { return new js.JQuery( id ); }
+	static inline function j( id : Dynamic ) : js.JQuery return new js.JQuery( id )
 
 	#if DEBUG
 	static inline function mytrace( v : Dynamic, ?inf : haxe.PosInfos ) { app.log( v, inf ); }

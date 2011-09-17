@@ -7,24 +7,98 @@ using StringTools;
 
 class App implements IApp {
 	
+	static inline var DOCPATH_HAXE_ORG = "http://haxe.org/api/";
+	static inline var DOCPATH_LOCAL = "DoX:";
 	static inline var MAX_SUGGESTION = 5;
-	static var API_DEF_REMOTE_PATH = "https://raw.github.com/tong/dox.chrome/master/";
-	//static var API_DEF_REMOTE_PATH = "http://192.168.0.110/dox.chrome/";
+	
+	//static var API_DEF_REMOTE_PATH = "https://raw.github.com/tong/dox.chrome/master/";
+	static var API_DEF_REMOTE_PATH = "http://192.168.0.110/dox.chrome/";
  	static var WEBSITESEARCH_SUGGESTIONS = ["haxe_wiki","haxe_ml","google_code","google_development","stackoverflow"];
 	static var HAXE_TARGETS = ["haxe","flash","js","neko","php"];
 	
+	//static var instance : App;
 	static var fs : FileSystem;
 	static var api : haxe.rtti.XmlParser;
 	static var traverser : Array<Array<SuggestResult>>;
 	static var actualAPIVersion : String;
 	
-	public var docpath : String;
+	static var tpl = new haxe.Template( haxe.Resource.getString( "doc" ) );
+	static var tab : chrome.Tab;
+	
 	public var apiVersion(default,null) : String;
 	public var haxeTargets(default,null) : Array<String>;
+	public var docpath : String;
+	public var printLocal(default,setPrintLocal) : Bool;
 	public var websiteSearchSuggestions(default,null) : Array<String>;
+	public var pinned(default,setPinned) : Bool;
 	
 	function new() {
+	
 		initExtension();
+		
+		/*
+		var contentScriptHost = new chrome.ExtensionHost();
+		contentScriptHost.onMessage = function(m:String){
+			contentScriptHost.send( "Hi website!" );
+		};
+		*/
+	}
+	
+	function setPrintLocal( v : Bool ) : Bool {
+		if( v ) {
+			docpath = DOCPATH_LOCAL;
+				/*
+			chrome.Tabs.create( {}, function(tab){
+				//chrome.Tabs.update( tab.id, { pinned : true } );
+				App.tab = tab;
+				chrome.Tabs.update( tab.id, { url: "file://" }, function(tab){
+					trace(tab.url);
+					chrome.Tabs.executeScript( tab.id, {file:"content.js"}, function(){ trace("cb"); } );
+				} );
+				
+			});
+				*/
+			
+			/*
+			chrome.Tabs.getSelected( null, function(tab) {
+				//chrome.Tabs.update( tab.id, { url: url } );
+				App.tab = tab;
+				chrome.Tabs.executeScript( tab.id, {file:"content.js"}, function(){ trace("cb"); } );
+			});
+			*/
+
+
+			// TODO activate history stuff
+		} else {
+			if( printLocal )  {
+				//TODO deactivate history stuff
+			}
+			docpath = DOCPATH_HAXE_ORG;
+		}
+		return printLocal = v;
+	}
+	
+	function setPinned( v : Bool ) : Bool {
+		if( v ) {
+			if( pinned )
+				return true;
+			trace("pINn");
+			chrome.Tabs.create( {}, function(tab){
+				chrome.Tabs.update( tab.id, { pinned : true } );
+				trace(tab.url);
+				tab.url = "DOX";
+				trace(tab.url);
+				App.tab = tab;
+			});
+			//chrome.Tabs.getSelected( null, function(tab) { chrome.Tabs.update( tab.id, { url: url } ); });
+		} else {
+			if( pinned ) {
+				//TODO close the pinnd tab
+				chrome.Tabs.remove( App.tab.id );
+				App.tab = null;
+			}
+		}
+		return pinned = v;
 	}
 	
 	public function initExtension() {
@@ -276,7 +350,7 @@ class App implements IApp {
 		
 		Omnibox.onInputEntered.addListener(
 			function(text:String) {
-				//trace( "Input entered: '"+text+"'" );
+				trace( "Input entered: '"+text+"'" );
 				if( text == null ) {
 					nav( docpath );
 					return;
@@ -286,6 +360,21 @@ class App implements IApp {
 					nav( "http://haxe.org/api" );
 					return;
 				}
+				
+				if( printLocal ) {
+					//TODO
+					
+					stripped_text = stripped_text.substr( 4 );
+					trace( stripped_text );
+					trace( tab );
+					
+					//chrome.Tabs.getSelected( null, function(tab) { chrome.Tabs.update( tab.id, { url : stripped_text } ); });
+					//chrome.Tabs.create( {} );
+					//nav( stripped_text );
+					return;
+				}
+				
+				//if( online ) {
 				if( stripped_text.startsWith( "http://" ) || stripped_text.startsWith( "https://" ) ) {
 					nav( stripped_text );
 					return;
@@ -294,7 +383,6 @@ class App implements IApp {
 		            nav( "http://"+stripped_text );
         		    return;
         		}
-        		
         		var suffix = " [HaXe Wiki]";
         		if( stripped_text.endsWith( suffix ) ) {
         			nav( "http://haxe.org/wiki/search?s="+formatSearchSuggestionQuery( stripped_text, suffix ) );
@@ -320,7 +408,10 @@ class App implements IApp {
 			}
 		);
 		LocalStorage.setItem( 'api_version', actualAPIVersion );
-		trace( "DoX active, use it!" );
+		
+		printLocal = true;
+		
+		trace( "DoX active, use it! "+docpath );
 	}
 	
 	function searchTypeSuggestions( root : Array<TypeTree>, term : String ) {
@@ -358,7 +449,6 @@ class App implements IApp {
 		var name = ( i == -1 ) ? t.path : t.path.substr( i+1 );
 		//var name = getTypeName( t.path );
 		if( name.toLowerCase().startsWith( term ) ) {
-			
 			// filter haxe target
 			var i = t.path.indexOf( "." );
 			if( i != -1 ) {
@@ -373,7 +463,6 @@ class App implements IApp {
 				if( !targetOk )
 					return false;
 			}
-		
 			var path = t.path.split( "." ).join( "/" ).toLowerCase();
 			if( path.startsWith( "flash" ) ) // hacking flash9 target path
 				path = "flash9"+path.substr(5);
@@ -412,6 +501,15 @@ class App implements IApp {
 	}
 	
 	static function nav( url : String ) {
+		/*
+		trace( "nav: "+url);
+		if( url.startsWith("DoX:") ) {
+			var path = url.substr( 4 );
+			trace( path );
+			//tpl.execute();
+			return;
+		}
+		*/
 		chrome.Tabs.getSelected( null, function(tab) { chrome.Tabs.update( tab.id, { url: url } ); });
 	}
 	
@@ -421,12 +519,16 @@ class App implements IApp {
 		if( time > 0 ) haxe.Timer.delay( n.cancel, time );
 	}
 	
+	//static function onPopState(e) {
+	
 	static function init() : IApp {
 		#if DEBUG
 		if( haxe.Firebug.detect() ) haxe.Firebug.redirectTraces();	
 		trace( "DoX.chrome" );
 		#end
 		return new App();
+		//instance = new App();
+		//instance.printLocal = true;
 	}
 	
 }

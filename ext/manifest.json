@@ -1,22 +1,25 @@
 {
 	"name": "DoX",
 	"description": "HaXe API omnibox search",
-	"version": "0.1.9",
+	"version": "0.1.10",
 	"minimum_chrome_version" : "10",
 	"icons": {
-		"16": "icons/icon_16.png",
-		"32": "icons/icon_32.png",
-		"48": "icons/icon_48.png",
-		"128": "icons/icon_128.png"
+		"16": "img/icon_16.png",
+		"32": "img/icon_32.png",
+		"48": "img/icon_48.png",
+		"128": "img/icon_128.png"
 	},
 	"background_page": "main.html",
 	"options_page": "options.html",  
 	"omnibox": { "keyword" : "hx" },
+	
 	"permissions": [
 		"tabs",
 		"unlimitedStorage",
 		"notifications",
 		"https://raw.github.com/",
-		"http://haxe.org/"
+		"http://haxe.org/",
+		"http://*/*",
+		"http://*/"
 	]
 }
