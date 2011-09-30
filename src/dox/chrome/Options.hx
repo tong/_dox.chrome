@@ -148,6 +148,7 @@ You can pull/fork the source code from <a href='https://github.com/tong/dox.chro
 			switch( id ) {
 			case 'reload_api_description' :
 				j( '#reload_api_description' ).hide();
+				chrome.ui.Options.setBusy();
 				haxe.Timer.delay( function(){
 					app.updateAPI( function(err){
 						if( err != null ) {
@@ -156,6 +157,7 @@ You can pull/fork the source code from <a href='https://github.com/tong/dox.chro
 							showDesktopNotification( "DoX", "API description successfully reloaded", 3200 );
 						}
 						j( '#reload_api_description' ).show();
+						chrome.ui.Options.setBusy( false );
 					});
 				}, 1 );
 			case "reset" :

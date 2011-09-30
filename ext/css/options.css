@@ -46,6 +46,29 @@ div.checkbox, div.radio {
     border-right: 1px solid #C2C2C2;
     z-index: 2;
 }
+
+#sidebar #title {
+	-webkit-padding-end: 24px;
+	padding-top: 13px;
+	padding-bottom: 14px;
+	text-align: end;
+	color: #53637D;
+	font-size: 200%;
+	font-weight: normal;
+	text-shadow: white 0 1px 2px;
+	-webkit-user-select: none;
+	cursor: pointer;
+}
+	/*
+#sidebar #title .text {
+	margin-right: 20px;
+}
+#sidebar #title .throbber {
+}
+	*/
+
+
+/*
 #sidebar #sidebar-title {
 	-webkit-padding-end: 24px;
 	padding-top: 13px;
@@ -58,6 +81,7 @@ div.checkbox, div.radio {
 	-webkit-user-select: none;
 	cursor: pointer;
 }
+*/
 #sidebar #icon {
 	position: absolute;
 	bottom: 10px;
@@ -84,6 +108,14 @@ div.checkbox, div.radio {
 	border-bottom: 1px solid #8FAAD9;
 	color: black;
 	text-shadow: #BBCEE9 0 1px 1px;
+}
+
+#throbber {
+	display: block;
+	position: relative;
+	top: 20px;
+	left: 174px;
+	z-index: 1000;
 }
 
 

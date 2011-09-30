@@ -4,8 +4,9 @@
 -cp ../chrome.extension
 -js ext/app.js
 dox.chrome.App
-#-D DEBUG
---no-traces
+-resource src/tpl/doc.html@doc
+-D DEBUG
+#--no-traces
 
 --next
 -cp src
@@ -15,5 +16,5 @@ dox.chrome.App
 -js ext/options.js
 dox.chrome.Options
 -D noEmbedJS
-#-D DEBUG
---no-traces
+-D DEBUG
+#--no-traces

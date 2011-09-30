@@ -45,3 +45,9 @@ api/_cpp.hxml
 -cp src
 #-cmd node buildapi.js
 #-cmd rm buildapi.js
+
+#--next
+#-lib hxJson2
+#-neko buildapi.n
+#-main dox.chrome.API
+#-cp src

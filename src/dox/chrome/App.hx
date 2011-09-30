@@ -5,7 +5,8 @@ import chrome.Omnibox;
 using Lambda;
 using StringTools;
 
-class App implements IApp {
+class App implements IApp,
+		  implements IExt {
 	
 	static inline var DOCPATH_HAXE_ORG = "http://haxe.org/api/";
 	static inline var DOCPATH_LOCAL = "DoX:";
@@ -16,7 +17,10 @@ class App implements IApp {
  	static var WEBSITESEARCH_SUGGESTIONS = ["haxe_wiki","haxe_ml","google_code","google_development","stackoverflow"];
 	static var HAXE_TARGETS = ["haxe","flash","js","neko","php"];
 	
+	static var inst : IExt;
+		
 	//static var instance : App;
+	static var ext :  chrome.remoting.ExtensionHost;
 	static var fs : FileSystem;
 	static var api : haxe.rtti.XmlParser;
 	static var traverser : Array<Array<SuggestResult>>;
@@ -33,15 +37,14 @@ class App implements IApp {
 	public var pinned(default,setPinned) : Bool;
 	
 	function new() {
-	
 		initExtension();
-		
-		/*
-		var contentScriptHost = new chrome.ExtensionHost();
-		contentScriptHost.onMessage = function(m:String){
-			contentScriptHost.send( "Hi website!" );
-		};
-		*/
+	}
+	
+	public function ext_handshake( id : String ) : Bool {
+		trace("website is calling!........");
+		return true;
+		//return a+b;
+		//return "A am chroooooooome! "+a+b;
 	}
 	
 	function setPrintLocal( v : Bool ) : Bool {
@@ -159,7 +162,7 @@ class App implements IApp {
 					// check here ...
 					//if( haveActualAPI() ) {}
 					
-					fe.file(function(file){
+					fe.file(function(file){using Lambda;
 						var r = new FileReader();
 						r.onloadend = function(e) {
 							//trace("------------------------------------------------------");
@@ -296,7 +299,7 @@ class App implements IApp {
 				/*
 				if( suggestions.length < MAX_SUGGESTION ) {
 					//TODO
-					trace("SEARCH public FIELDS/METHODS............. "+term );
+					trace("SEARCH public FIELDS/METHODS....using Lambda;......... "+term );
 					
 					for( tree in api.root ) {
 						switch( tree ) {
@@ -555,13 +558,26 @@ class App implements IApp {
 	//static function onPopState(e) {
 	
 	static function init() : IApp {
+		
 		#if DEBUG
 		if( haxe.Firebug.detect() ) haxe.Firebug.redirectTraces();	
 		trace( "DoX.chrome" );
 		#end
-		return new App();
-		//instance = new App();
-		//instance.printLocal = true;
+		
+		var app : IApp = new App();
+		
+		var ctx = new haxe.remoting.Context();
+		ctx.addObject( "inst", app );
+		var hxr = new chrome.remoting.ExtensionHost( ctx );
+		
+		/*
+		var host = new chrome.ExtensionHost();
+		host.onMessage = function(m:String){
+			host.send( "Hi website!" );
+		};
+		*/
+		
+		return app;
 	}
 	
 }
