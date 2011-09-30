@@ -1,20 +1,28 @@
 
+#-cp ../dsi
+#-cp ../hx.html5/idb
+#-cp ../hxgithub
 -cp src
+-cp ../dox
+-cp ../dui
 -cp ../hx.html5
+-cp ../hx.html5/webdb
 -cp ../chrome.extension
--js ext/app.js
+-js ext/js/app.js
 dox.chrome.App
--resource src/tpl/doc.html@doc
+-D chrome
 -D DEBUG
 #--no-traces
 
 --next
 -cp src
+-cp ../dui
 -cp ../hx.html5
 -cp ../chrome.extension
 -cp ../chrome.extension.ui
--js ext/options.js
+-js ext/js/options.js
 dox.chrome.Options
+-D chrome
 -D noEmbedJS
 -D DEBUG
 #--no-traces

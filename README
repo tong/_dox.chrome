@@ -1,23 +1,22 @@
 
 DOX.CHROME
 ==========
-Chrome extension for searching the haXe API using the omnibox.
+Chrome extension for searching haXe api documents.
 
 
 ABOUT
 -----
-This extension integrates with the Chrome omnibox to bring haXe standard library API search autocompletion right to your fingertips.
+This extension integrates with the Chrome omnibox to bring haXe (http://haxe.org/) standard library API autocompletion right to your fingertips.
 To use, type "hx", followed by a space or tab, followed by your query.
 The first time you use the extension, there may be some delay, as the class index is retrieved and cached.
 On subsequent uses, however, you should see instantaneous autocompletions.
 Selecting a completion or fully typing a class name and then pressing enter will take you directly to the relevant documentation.
 If a completion cannot be found, several search suggestions will be provided, including Google Codesearch, Stackoverflow and others.
-Check the options page to configure the extension to your needs.
-If you experience any issues with this extension, please use the bug tracker at https://github.com/tong/dox.chrome/issues
 
 
 INSTALL
 -------
+The DoX extension is available in the chrome webstore:
 https://chrome.google.com/webstore/detail/oocmdgebgfalcjefajhpkdkmlfcanljg
 
 
@@ -36,4 +35,4 @@ ID: oocmdgebgfalcjefajhpkdkmlfcanljg
 
 AUTHOR
 ------
-xmpp:tong@jabber.spektral.at
+xmpp:tong.disktree@gmail.com
