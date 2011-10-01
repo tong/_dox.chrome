@@ -1,5 +1,6 @@
 package dox.chrome;
 
+using Lambda;
 using StringTools;
 
 class Options {
@@ -21,11 +22,11 @@ class Options {
 				switch( id ) {
 				case "haxe_targets" :
 					//trace(app.haxe_target);
-					for( id in app.haxe_targets )
-						j( '#checkbox_haxetarget_'+id ).attr( 'checked', 'true' );
+					for( id in app.getHaxeTargets() )
+						j( '#haxetarget_'+id ).attr( 'checked', 'true' );
 				case "search_suggestions" :
-					for( id in app.website_search_suggestions )
-						j( '#checkbox_websitesearch_'+id ).attr( 'checked', 'true' );
+					for( id in app.getWebsiteSearchSuggestions() )
+						j( '#websitesearch_'+id ).attr( 'checked', 'true' );
 				}
 			}
 		}
@@ -48,18 +49,18 @@ class Options {
 				//trace("TODO toggle omnibox");
 				//app.omnibox != app.omnibox;
 			default :
-				if( id.startsWith( 'checkbox_haxetarget' ) ) {
-					var _id = id.substr( 20 );
-					if( params ) app.haxe_targets.push( _id ) else app.haxe_targets.remove( _id );
-					app.saveSettings();
-					if( app.haxe_targets.length == 0 )
+				if( id.startsWith( 'haxetarget' ) ) {
+					var _id = id.substr( 11 );
+					if( params ) app.addHaxeTarget( _id ) else app.removeHaxeTarget( _id );
+			//		app.saveSettings();
+					if( app.getHaxeTargets().length == 0 )
 						showDesktopNotification( "Warning!", "You just deactivated all haXe targets!", 5200 );
 					return;
 				}
-				if( id.startsWith( 'checkbox_websitesearch' ) ) {
-					var _id = id.substr( 23 );
-					if( params ) app.website_search_suggestions.push( _id ) else app.website_search_suggestions.remove( _id );
-					app.saveSettings();
+				if( id.startsWith( 'websitesearch' ) ) {
+					var _id = id.substr( 14 );
+					if( params ) app.addWebsiteSearchSuggestion( _id ) else app.removeWebsiteSearchSuggestion( _id );
+			//		app.saveSettings();
 					return;
 				}
 				if( id.startsWith( 'displaytarget_' ) ) {
@@ -81,7 +82,7 @@ class Options {
 		
 		/////////////////////////////////////////////////////////
 		
-		var data = cast {
+		var root = cast {
 			name : "DoX",
 			favicon : "img/favicon.png",
 			icon : "img/icon_48.png",
@@ -209,7 +210,7 @@ class Options {
 				}
 			]
 		}
-		chrome.ui.Options.init( OptionsRoot.data );
+		chrome.ui.Options.init( root );
 	}
 	
 	/*

@@ -21,18 +21,25 @@ interface IApp {
 	
 	//var pinWebApp(default,set) : Bool;
 	
-	var use_omnibox(default,setUseOmnibox) : Bool;
-	var haxe_targets(default,null) : Array<String>;
-	var website_search_suggestions(default,null) : Array<String>;
+//	var use_omnibox(default,setUseOmnibox) : Bool;
+//	var haxe_targets(default,null) : Array<String>;
+//	var website_search_suggestions(default,null) : Array<String>;
 	
 	/*
-	function getHaxeTargets() : Array<String>;
-	function addHaxeTarget( t : String  ) : Void;
-	function removeHaxeTarget( t : String  ) : Void;
 	*/
+	//function getHaxeTargetsList() : Array<String>;
+	//function getHaxeTargets() : Array<dox.HaXeTarget>;
+	function getHaxeTargets() : Array<String>;
+	function addHaxeTarget( t : String ) : Bool;
+	function removeHaxeTarget( t : String ) : Bool;
 	
+	function getWebsiteSearchSuggestions() : Array<String>;
+	function addWebsiteSearchSuggestion( t : String ) : Bool;
+	function removeWebsiteSearchSuggestion( t : String ) : Bool;
+	function clearWebsiteSearchSuggestions() : Void;
+	
+	//function saveSettings() : Void;
 	function resetSettings() : Void;
-	function saveSettings() : Void;
 	
 	#if DEBUG
 	function log( v : Dynamic, ?inf : haxe.PosInfos ) : Void;

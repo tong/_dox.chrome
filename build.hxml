@@ -5,6 +5,7 @@
 -cp src
 -cp ../dox
 -cp ../dui
+-cp ../dsi
 -cp ../hx.html5
 -cp ../hx.html5/webdb
 -cp ../chrome.extension
@@ -16,6 +17,7 @@ dox.chrome.App
 
 --next
 -cp src
+-cp ../dox
 -cp ../dui
 -cp ../hx.html5
 -cp ../chrome.extension

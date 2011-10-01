@@ -7,7 +7,7 @@ using StringTools;
 
 class Omnibox {
 	
-	public static inline var MAX_SUGGESTIONS = 10;
+	public static inline var MAX_SUGGESTIONS = 5;
 	
 	public var active(default,null) : Bool;
 	
@@ -26,6 +26,7 @@ class Omnibox {
 		chrome.Omnibox.onInputChanged.addListener( onInputChanged );
 		chrome.Omnibox.onInputEntered.addListener( onInputEntered );
 		active = true;
+		trace( "Omnibox activated" );
 	}
 	
 	public function deactivate() {
@@ -35,6 +36,7 @@ class Omnibox {
 		chrome.Omnibox.onInputChanged.removeListener( onInputChanged );
 		chrome.Omnibox.onInputEntered.removeListener( onInputEntered );
 		active = false;
+		trace( "Omnibox deactivated" );
 	}
 	
 	function onInputStarted() {
@@ -47,6 +49,7 @@ class Omnibox {
 	}
 	
 	function onInputChanged( text : String, suggest : Array<chrome.SuggestResult>->Void ) {
+		
 		if( text == null )
 			return;
 		var stext = text.trim();
@@ -56,110 +59,75 @@ class Omnibox {
 			setDefaultSuggestion();
 			return;
 		}
+		
 		var term = stext.toLowerCase();
-		var suggestions = new Array<SuggestResult>();
-		var found = App.api.search( term );
-		//trace( found.length );
-		
-		//TODO filter haxe targets
-		trace(found.length);
-		
-		//var r = new Array<SuggestResult>();
-		//var r = filterPlatform( found ); //new Array<SuggestResult>();
-		
-		/*
-		for( f in found ) {
-			//trace( f);
-			switch(f) {
-			case TPackage(n,f,subs) :
-			case TTypedecl(t) :
-			case TEnumdecl(e) : 
-			case TClassdecl(c) :
-				//trace( c.platforms );
-				if( c.platforms != null ) {
-					for( p in c.platforms ) {
-						var match = false;
-						for( t in app.haxe_targets ) {
-							if( t == p ) {
-								match = true;
-								break;
-							}
-						}
-						if( match ) break;
-					}
-					//if( !match ) return;
-				}
-			}
-		}
-		*/
-
-		// TODO sort by name
-		
-		
-		var suggestions = new Array<SuggestResult>();
-		if( found.length > 0 ) {
-			if( found.length > MAX_SUGGESTIONS ) found = found.slice( 0, MAX_SUGGESTIONS );
-			for( i in 0...MAX_SUGGESTIONS ) {
-				if( i > found.length-1 )
-					break;
-				var tree = found[i];
-				switch( tree ) {
-				case TPackage(n,f,subs) :
-	//				if( n.fastCodeAt(0) == 95 ) // "_"
-	//					continue;
-					//trace( f );
-					var parts = f.split( "." );
-					for( p in parts ) {
-						if( p == term ) {
+		var search = new APISearch();
+		search.run( term, App.api.root, function(found){
+			//trace( found.length+" trees found" );
+			var suggestions = new Array<SuggestResult>();
+			if( found.length > 0 ) { // add found links
+				if( found.length > MAX_SUGGESTIONS ) found = found.slice( 0, MAX_SUGGESTIONS );
+				var n = MAX_SUGGESTIONS;
+				if( found.length < n ) n = found.length;
+				for( i in 0...n ) {
+					var tree = found[i];
+					switch( tree ) {
+					case TPackage(n,f,subs) :
+					//	if( n.fastCodeAt(0) == 95 ) // "_"
+		//					continue;
+						//trace( f );
+						var parts = f.split( "." );
+						for( p in parts ) {
 							var url = docpath + parts.join("/");
 							suggestions.push({
 								content : docpath + f.split( "." ).join( "/" ).toLowerCase(),
-								description : "<match>"+f+"</match> - <url>"+url+"</url>"
+								description : "<match>"+f+"</match> - <url><dim>"+url+"</dim></url>"
 							});
 						}
+					case TTypedecl(t) : addSuggestion( suggestions, t );
+					case TEnumdecl(e) : addSuggestion( suggestions, e );
+					case TClassdecl(c) : addSuggestion( suggestions, c );
 					}
-				case TTypedecl(t) : addSuggestion( suggestions, t );
-				case TEnumdecl(e) : addSuggestion( suggestions, e );
-				case TClassdecl(c) : addSuggestion( suggestions, c );
 				}
 			}
-		}
-		
-		if( stext.length >= 2 ) {
-			//trace( suggestions.length +" : "+ MAX_SUGGESTIONS+" "+app.website_search_suggestions+": "+app.website_search_suggestions.has( "haxe_wiki" ) );
-			if( suggestions.length < MAX_SUGGESTIONS && app.website_search_suggestions.has( "haxe_wiki" ) ) {
-				suggestions.push( {
-					 content : stext+" [HaXe Wiki]",
-					 description : [ "Search \"<match>", stext, "</match>\" at <match><url>HaXe-Wiki</url></match> - <url>http://haxe.org/wiki/search?s=", StringTools.urlEncode(stext), "</url>" ].join('')
-				});
-				if( suggestions.length < MAX_SUGGESTIONS && app.website_search_suggestions.has( "haxe_ml" ) ) {
-					suggestions.push( {
-				 		content : stext+" [HaXe Mailing List]",
-				 		description : [ "Search \"<match>", stext, "</match>\" at <match><url>HaXe-MailingList</url></match> - <url>http%3A%2F%2Fhaxe.1354130.n2.nabble.com%2Ftemplate%2FNamlServlet.jtp%3Fmacro%3Dsearch_page%26node%3D1354130%26query%3D", StringTools.urlEncode(stext), "</url>" ].join('')
-				 	});
-				}
-				if( suggestions.length < MAX_SUGGESTIONS && app.website_search_suggestions.has( "stackoverflow" ) ) {
-					suggestions.push( {
-				 		content : stext+" [Stackoverflow]",
-				 		description : [ "Search \"<match>", stext, "</match>\" at <match><url>Stackoverflow</url></match> - <url>http://stackoverflow.com/search?q=", StringTools.urlEncode(stext), "</url>" ].join('')
-				 	});
-				}
-				if( suggestions.length < MAX_SUGGESTIONS && app.website_search_suggestions.has( "google_code" ) ) {
-					suggestions.push( {
-				 		content : stext+" [Google Code]",
-				 		description : [ "Search \"<match>", stext, "</match>\" at <match><url>Google Code</url></match> - <url>http://www.google.com/codesearch?q=", StringTools.urlEncode(stext), "</url>" ].join( '' )
-				 	});
-				}
-				if( suggestions.length < MAX_SUGGESTIONS && app.website_search_suggestions.has( "google_development" ) ) {
-					suggestions.push( {
-				 		content : stext+" [Google development]",
-				 		description : [ "Search \"<match>", stext, "</match>\" at <match><url>Google Develoment Search</url></match> - <url>http://www.google.com/cse?cx=005154715738920500810:fmizctlroiw&amp;q=", StringTools.urlEncode( stext ), "</url>" ].join( '' )
-				 	});
-				}
+			if( stext.length >= 2 ) { // add website search suggestions
+				var sugs = app.getWebsiteSearchSuggestions();
+				if( suggestions.length < MAX_SUGGESTIONS && sugs.has( "haxe_wiki" ) )
+					suggestions.push( createWebsiteSuggestionURL( stext, "HaXe Wiki", "http://haxe.org/wiki/search?s=" ) );
+				if( suggestions.length < MAX_SUGGESTIONS && sugs.has( "haxe_ml" ) )
+					suggestions.push( createWebsiteSuggestionURL( stext, "HaXe Mailing List", "http%3A%2F%2Fhaxe.1354130.n2.nabble.com%2Ftemplate%2FNamlServlet.jtp%3Fmacro%3Dsearch_page%26node%3D1354130%26query%3D" ) );
+				if( suggestions.length < MAX_SUGGESTIONS && sugs.has( "stackoverflow" ) )
+					suggestions.push( createWebsiteSuggestionURL( stext, "Stackoverflow", "http://stackoverflow.com/search?q=" ) );
+				if( suggestions.length < MAX_SUGGESTIONS && sugs.has( "google_code" ) )
+					suggestions.push( createWebsiteSuggestionURL( stext, "Google Code", "http://www.google.com/codesearch?q=" ) );
+				if( suggestions.length < MAX_SUGGESTIONS && sugs.has( "google_development" ) )
+					suggestions.push( createWebsiteSuggestionURL( stext, "Google Development", "http://www.google.com/cse?cx=005154715738920500810:fmizctlroiw&amp;q=" ) );
 			}
-		}
-		suggest( suggestions );
+			suggest( suggestions );
+		});
 	}
+	
+	function createWebsiteSuggestionURL( t : String, id : String, url : String ) : SuggestResult {
+		return { content : t+' ['+id+']', description : 'Search "<url>'+t+'</url>" at '+id+'<dim> - '+url+'"'+t.urlEncode()+'"></dim>' }
+	}
+	
+	/*
+	function filterTypePlatform( r : Array<TypeTree>, c : Dynamic, tree : TypeTree ) {
+		if( c.platforms != null ) {
+			var it : Iterable<String> = c.platforms;
+			for( p in it ) {
+				//trace(pfs);
+				if( app.haxe_targets.has( p ) ) {
+					r.push( tree );
+					return;
+				}
+			}
+			trace("filtered");
+		} else {
+			r.push( tree );
+		}
+	}
+	*/
 	
 	/*
 	function filterPlatform( root : TypeRoot ) : TypeRoot {
@@ -190,22 +158,6 @@ class Omnibox {
 	*/
 	
 	function addSuggestion( suggestions : Array<SuggestResult>, c : Dynamic ) {
-		/*
-		var allowed = false;
-		var pf : List<String> = c.platforms;
-		for( p in pf ) {
-			for( t in app.haxe_targets ) {
-				if( t == p ) {
-					allowed = true;
-					break;
-				}
-			}
-			if( allowed )
-				break;
-		}
-		if( !allowed )
-			return;
-		*/
 		var path : String = c.path.split( "." ).join( "/" ).toLowerCase();
 		var i = c.path.lastIndexOf( "." );
 		var name = ( i == -1 ) ? c.path : c.path.substr( i+1 );
@@ -225,7 +177,7 @@ class Omnibox {
 			description += " - "+s;
 			*/
 		}
-		description += " <url><dim>"+url+"</dim></url>";
+		description += " - <url><dim>"+url+"</dim></url>";
 		suggestions.push( { content : url, description: description } );
 		//return { content : url, description: description };
 	}
@@ -237,12 +189,6 @@ class Omnibox {
 			return;
 		}
 		var stext = text.trim();
-		/* 
-		if( stext == null ) {
-			nav( "http://haxe.org/api" );
-			return;
-		}
-		*/
 		if( stext.startsWith( "http://" ) || stext.startsWith( "https://" ) ) {
 			App.nav( stext );
 			return;
@@ -269,7 +215,7 @@ class Omnibox {
 			App.nav( "http://www.google.com/codesearch?q="+StringTools.urlEncode( "haxe "+formatSearchSuggestionQuery( stext, suffix ) ) );
 			return;
 		}
-		if( stext.endsWith( suffix = " [Google development]" ) ) {
+		if( stext.endsWith( suffix = " [Google Development]" ) ) {
 			App.nav( "http://www.google.com/cse?cx=005154715738920500810:fmizctlroiw&q=haxe "+formatSearchSuggestionQuery( stext, suffix ) );
 			return;
 		}
