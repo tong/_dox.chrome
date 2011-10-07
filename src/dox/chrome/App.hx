@@ -8,15 +8,14 @@ class App implements IApp {
 	
 	public static inline var VERSION = "0.2";
 	
-	static var defaultHaxeTargets = ["flash","js","neko","php"];
+	static var defaultHaxeTargets = ["cpp","flash","js","neko","php"];
 	static var defaultWebsiteSearches = ["haxe_wiki","haxe_ml","google_code","google_development","stackoverflow"];
 	
 	public static var online(default,null) : Bool;
 	public static var api(default,null) : API;
-//	public static var apistore(default,null) : APIStore;
+	public static var webapp(default,null) : WebApp;
 	
 	static var omnibox : Omnibox;
-	static var webapp : WebApp;
 	
 	//public var use_omnibox(default,setUseOmnibox) : Bool;
 //	public var haxe_targets(default,null) : Array<String>;
@@ -68,7 +67,6 @@ class App implements IApp {
 		var d = LocalStorage.getItem( "haxetargets" );
 		if( d == null ) {
 			haxetargets = defaultHaxeTargets;
-			//LocalStorage.setItem( "haxetargets", JSON.stringify( haxetargets ) );
 			saveHaxetargets();
 		} else {
 			haxetargets = JSON.parse( d );
@@ -76,11 +74,12 @@ class App implements IApp {
 		d = LocalStorage.getItem( "websitesearches" );
 		if( d == null ) {
 			websitesearches = defaultWebsiteSearches;
-			//LocalStorage.setItem( "websitesearches", JSON.stringify( websitesearches ) );
 			saveWebsitesearches();
 		} else {
 			websitesearches = JSON.parse( d );
 		}
+		
+		var stime = haxe.Timer.stamp();
 		
 		api = new API();
 		api.init( function(e){
@@ -88,48 +87,10 @@ class App implements IApp {
 				//TODO
 				trace( e );
 			} else {
-				trace( "ok" );
-				//trace( api.length );
+				trace( haxe.Timer.stamp()-stime );
 				run();
 			}
 		});
-		
-		
-		/*
-		apistore = new APIStore();
-		apistore.init(function(loaded){
-			if( loaded.length == 0 ) {
-				trace( "0 apis in local storage ... loading std from remote host ..." );
-				//xhr( 'http://192.168.0.110/hxmpp/doc/api_flash.xml' );
-				var r = new haxe.Http( 'http://192.168.0.110/hxmpp/doc/api_flash.xml' );
-				r.onData = function(t){
-					trace("remote loaded");
-					api.loadString( t, ["flash"] );
-					trace( api.root.length );
-					
-					apistore.set( "std", true, t, function(e){
-						trace(e);
-					});
-					
-					run();
-				}
-				r.onError = function(e){
-					trace(e);
-					//TODO showDesktopNot
-				}
-				r.request(false);
-			} else {
-				for( d in loaded ) {
-					if( d.active ) {
-						api.loadString( d.content, ["flash","js","neko","php"] );
-					}
-				}
-				trace( api.root.length );
-				run();
-			}
-		});
-		*/
-		
 	}
 	
 	function run() {
@@ -137,20 +98,13 @@ class App implements IApp {
 			omnibox = new Omnibox( this );
 			omnibox.activate();
 	//	}
+	/*
 		webapp = new WebApp();
 		webapp.init();
-		
-		//api.search();
+	*/
 	}
 	
 	/// ---------- IApp ----------
-	
-	/*
-	public function getHaxeTargetsList() : Array<String> {
-		return null;
-		//return haxe_targets.copy();
-	}
-	*/
 	
 	public function getHaxeTargets() : Array<String> {
 		return haxetargets.copy();
@@ -161,6 +115,7 @@ class App implements IApp {
 			return false;
 		haxetargets.push( t );
 		saveHaxetargets();
+		//omnibox.platforms = haxetargets.copy();
 		return true;
 	}
 	

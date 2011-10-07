@@ -8,16 +8,18 @@ using StringTools;
 class Omnibox {
 	
 	public static inline var MAX_SUGGESTIONS = 5;
+	public static inline var HAXE_ORG_API_PATH = "http://haxe.org/api/";
 	
 	public var active(default,null) : Bool;
 	
 	var app : IApp;
 	var docpath : String;
+	var search : APISearch;
 	
 	public function new( app : IApp ) {
 		this.app = app;
 		active = false;
-		docpath = "http://haxe.org/api/";
+		docpath = HAXE_ORG_API_PATH;
 	}
 	
 	public function activate() {
@@ -25,8 +27,9 @@ class Omnibox {
 		chrome.Omnibox.onInputCancelled.addListener( onInputCancelled );
 		chrome.Omnibox.onInputChanged.addListener( onInputChanged );
 		chrome.Omnibox.onInputEntered.addListener( onInputEntered );
+		search = new APISearch();
 		active = true;
-		trace( "Omnibox activated" );
+		trace( "DoX omnibox activated" );
 	}
 	
 	public function deactivate() {
@@ -35,8 +38,9 @@ class Omnibox {
 		chrome.Omnibox.onInputCancelled.removeListener( onInputCancelled );
 		chrome.Omnibox.onInputChanged.removeListener( onInputChanged );
 		chrome.Omnibox.onInputEntered.removeListener( onInputEntered );
+		search = null;
 		active = false;
-		trace( "Omnibox deactivated" );
+		trace( "DoX omnibox deactivated" );
 	}
 	
 	function onInputStarted() {
@@ -61,14 +65,14 @@ class Omnibox {
 		}
 		
 		var term = stext.toLowerCase();
-		var search = new APISearch();
-		search.run( term, App.api.root, function(found){
-			//trace( found.length+" trees found" );
+		
+		//var stime = haxe.Timer.stamp();
+		search.run( term, App.api.root, app.getHaxeTargets(), function(found){
+			//trace( found.length+" trees found ("+(haxe.Timer.stamp()-stime)+")" );
 			var suggestions = new Array<SuggestResult>();
 			if( found.length > 0 ) { // add found links
 				if( found.length > MAX_SUGGESTIONS ) found = found.slice( 0, MAX_SUGGESTIONS );
-				var n = MAX_SUGGESTIONS;
-				if( found.length < n ) n = found.length;
+				var n = ( found.length < MAX_SUGGESTIONS ) ? found.length : MAX_SUGGESTIONS;
 				for( i in 0...n ) {
 					var tree = found[i];
 					switch( tree ) {
@@ -87,6 +91,7 @@ class Omnibox {
 					case TTypedecl(t) : addSuggestion( suggestions, t );
 					case TEnumdecl(e) : addSuggestion( suggestions, e );
 					case TClassdecl(c) : addSuggestion( suggestions, c );
+					//default : addSuggestion( suggestions, TypeApi.typeInfos( tree ) );
 					}
 				}
 			}
@@ -129,34 +134,6 @@ class Omnibox {
 	}
 	*/
 	
-	/*
-	function filterPlatform( root : TypeRoot ) : TypeRoot {
-		var r = new Array<TypeTree>();
-		for( tree in root ) {
-			switch( tree ) {
-			case TPackage(n,f,subs) :
-			case TTypedecl(t) :  if( !filterTypePlatform(t) ) r.push(tree);
-			case TEnumdecl(e) :  if( !filterTypePlatform(e) ) r.push(tree);
-			case TClassdecl(c) : if( !filterTypePlatform(c) ) r.push(tree);
-			}
-		}
-		return r;
-	}
-	
-	function filterTypePlatform( d : Dynamic) : Bool {
-		if( d.platforms != null ) {
-			var it : Iterator<String> = d.platforms.iterator();
-			for( p in it ) {
-				if( Lambda.has( app.haxe_targets, p ) ) {
-					return true;
-				}
-			}
-			return false;
-		}
-		return true;
-	}
-	*/
-	
 	function addSuggestion( suggestions : Array<SuggestResult>, c : Dynamic ) {
 		var path : String = c.path.split( "." ).join( "/" ).toLowerCase();
 		var i = c.path.lastIndexOf( "." );
@@ -167,6 +144,7 @@ class Omnibox {
 		var description =  "<match>"+c.path+"</match>";
 		//if( c.path != name ) description += " ("+c.path+")";
 		if( c.doc != null && c.doc != "" ) {
+			//TODO
 			/*
 			var s = c.doc.trim();
 			var r = ~/(<.+>)/;
@@ -179,7 +157,6 @@ class Omnibox {
 		}
 		description += " - <url><dim>"+url+"</dim></url>";
 		suggestions.push( { content : url, description: description } );
-		//return { content : url, description: description };
 	}
 	
 	function onInputEntered( text : String ) {
