@@ -1,6 +1,4 @@
 
-#-cp ../dsi
-#-cp ../hx.html5/idb
 #-cp ../hxgithub
 -cp src
 -cp ../dox
@@ -17,7 +15,7 @@ dox.chrome.App
 
 --next
 -cp src
--cp ../dox
+#-cp ../dox
 -cp ../dui
 -cp ../hx.html5
 -cp ../chrome.extension

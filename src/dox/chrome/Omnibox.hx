@@ -113,7 +113,7 @@ class Omnibox {
 	}
 	
 	function createWebsiteSuggestionURL( t : String, id : String, url : String ) : SuggestResult {
-		return { content : t+' ['+id+']', description : 'Search "<url>'+t+'</url>" at '+id+'<dim> - '+url+'"'+t.urlEncode()+'"></dim>' }
+		return { content : t+' ['+id+']', description : 'Search "<url>'+t+'</url>" at '+id+'<dim> - '+url+'"'+t.urlEncode()+'"</dim>' }
 	}
 	
 	/*
