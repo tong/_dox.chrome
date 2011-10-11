@@ -98,12 +98,20 @@ class App implements IApp {
 		api = new API();
 		api.init( function(e){
 			if( e != null ) {
-				trace(e);
 				if( e == "0" ) {
 					var loader = new APILoader( API.REMOTE_HOST+"std.dx" );
 					loader.onSuccess = function(t){
-						api.mergeString(t);
-						run();
+						UI.desktopNotification( "", "Std api description updated" );
+						api.addAPI( { name : "std", active : true, root : t }, function(e){
+							if( e != null ) {
+								UI.desktopNotification( "", "Failed to load haXe std api description from remote host ("+API.REMOTE_HOST+"). Check your internet connection and reload the extension", -1 );
+							} else {
+								run();
+							}
+						});
+					}
+					loader.onFail = function(t){
+						UI.desktopNotification( "", "Failed to load haXe std api description from remote host ("+API.REMOTE_HOST+"). Check your internet connection and reload the extension", -1 );
 					}
 					loader.load( true );
 				} else {
@@ -120,6 +128,7 @@ class App implements IApp {
 	}
 	
 	function run() {
+		trace( "DoX.chrome running .." );
 		omnibox.searchPrivateTypes = _searchPrivateTypes;
 		omnibox.activate();
 		//webapp = new WebApp();
