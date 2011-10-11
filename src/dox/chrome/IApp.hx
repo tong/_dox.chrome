@@ -3,6 +3,7 @@ package dox.chrome;
 interface IApp {
 	
 	var searchPrivateTypes(getSearchPrivateTypes,setSearchPrivateTypes) : Bool;
+	var showTypeKind(getShowTypeKind,setShowTypeKind) : Bool;
 	
 	function getHaxeTargets() : Array<String>;
 	function addHaxeTarget( t : String ) : Bool;

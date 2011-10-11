@@ -1,5 +1,4 @@
 
-#-cp ../hxgithub
 -cp src
 -cp ../dox
 -cp ../dui
@@ -10,12 +9,11 @@
 -js ext/js/app.js
 dox.chrome.App
 -D chrome
--D DEBUG
-#--no-traces
+#-D DEBUG
+--no-traces
 
 --next
 -cp src
-#-cp ../dox
 -cp ../dui
 -cp ../hx.html5
 -cp ../chrome.extension
@@ -24,5 +22,5 @@ dox.chrome.App
 dox.chrome.Options
 -D chrome
 -D noEmbedJS
--D DEBUG
-#--no-traces
+#-D DEBUG
+--no-traces

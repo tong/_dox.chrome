@@ -13,7 +13,6 @@ class Options {
 		
 		#if DEBUG
 		haxe.Log.trace = mytrace;
-		//haxe.Firebug.redirectTraces();
 		trace( "DoX.options" );
 		#end
 		
@@ -27,6 +26,7 @@ class Options {
 					for( id in app.getWebsiteSearchSuggestions() )
 						j( '#websitesearch_'+id ).attr( 'checked', 'true' );
 					j( '#search_private_types' ).attr( 'checked', app.searchPrivateTypes?'checked':null );
+					j( '#show_type_kind' ).attr( 'checked', app.showTypeKind?'checked':null );
 				}
 			}
 		}
@@ -45,44 +45,30 @@ class Options {
 						});
 					}, 200 );
 				}, 1 );
-			case "omnibox" :
-				//trace("TODO toggle omnibox");
+			//case "omnibox" :
 				//app.omnibox != app.omnibox;
 			default :
 				if( id.startsWith( 'haxetarget' ) ) {
 					var _id = id.substr( 11 );
 					if( params ) app.addHaxeTarget( _id ) else app.removeHaxeTarget( _id );
-			//		app.saveSettings();
 					if( app.getHaxeTargets().length == 0 )
 						UI.desktopNotification( "Warning!", "You just deactivated all haXe targets!", 5200 );
 					return;
 				}
-				/*
-				if( id.startsWith( 'displaytarget_' ) ) {
-					var _id = id.substr( 14 );
-					//TODO ........................
-					var info = j( '#displaytarget_description' );
-					switch( _id ) {
-					case "webapp" :
-						info.html('Web app display');
-					case "omnibox" :
-						info.html('Omnibox display');
-					}
-					//trace(_id);
-					return;
-				}
-				*/
 				if( id.startsWith( 'websitesearch' ) ) {
 					var _id = id.substr( 14 );
 					if( params ) app.addWebsiteSearchSuggestion( _id ) else app.removeWebsiteSearchSuggestion( _id );
-			//		app.saveSettings();
 					return;
 				}
 				if( id.startsWith( 'search_private_types' ) ) {
 					app.searchPrivateTypes = params;
 					return;
 				}
-				trace("??????? "+id );
+				if( id.startsWith( 'show_type_kind' ) ) {
+					app.showTypeKind = params;
+					return;
+				}
+				trace( "??????? "+id );
 			}
 		}
 		
@@ -99,19 +85,6 @@ class Options {
 					id : "settings",
 					label : "Search",
 					groups : [
-						/*
-						{
-							id : "displaytarget",
-							label : "Display",
-							content : [
-								{ id : "displaytarget", type : "radio", options : [
-									{ id : "displaytarget_omnibox", title : "Omnibox display" },
-									{ id : "displaytarget_webapp", title : "Web display" },
-								] },
-								{ id : "displaytarget_description", type : "description", content : "ABC" },
-							]
-						},
-						*/
 						{
 							id : "haxe_targets",
 							label : "Search settings",
@@ -122,14 +95,12 @@ class Options {
 								{ id : "haxetarget_js", type : "checkbox", label : "js" },
 								{ id : "haxetarget_neko", type : "checkbox", label : "neko" },
 								{ id : "haxetarget_php", type : "checkbox", label : "php" },
-								//{ id : "haxetarget_sys", type : "checkbox", label : "sys" },
 								{ type : "margin", value : "16" },
 								{ id : "search_private_types", type : "checkbox", label : "Search private types" },
-								/*
-								{ type : "margin", value : "16" },
-								{ type : "description", content : "Toggle field/method search." },
-								{ id : "search_inner", type : "checkbox", label : "Also search fields and methods" },
-								*/
+								{ id : "show_type_kind", type : "checkbox", label : "Show kind of type (class,enum,typedef)" },
+								//{ type : "margin", value : "16" },
+								//{ type : "description", content : "Toggle field/method search." },
+								//{ id : "search_inner", type : "checkbox", label : "Also search fields and methods" },
 							]
 						},
 						/*
@@ -235,12 +206,6 @@ class Options {
 		}
 		chrome.ui.Options.init( root );
 	}
-	
-	/*
-	public static function getActivePackages() : Array<Dynamic> {
-		return null;	
-	}
-	*/
 	
 	static inline function j( id : Dynamic ) : js.JQuery return new js.JQuery( id )
 	

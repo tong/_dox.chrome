@@ -19,6 +19,7 @@ class Omnibox {
 	
 	public var active(default,null) : Bool;
 	public var searchPrivateTypes : Bool;
+	public var showTypeKind : Bool;
 	
 	var app : IApp;
 	var docpath : String;
@@ -30,6 +31,7 @@ class Omnibox {
 		docpath = HAXE_ORG_API_PATH;
 		//useLocalDocs = true;
 		searchPrivateTypes = true;
+		showTypeKind = true;
 	}
 	
 	public function activate() {
@@ -99,10 +101,10 @@ class Omnibox {
 								description : "<match>"+f+"</match> - <url><dim>"+url+"</dim></url>"
 							});
 						}
-					//case TTypedecl(t) : addSuggestion( suggestions, t );
-					//case TEnumdecl(e) : addSuggestion( suggestions, e );
-					//case TClassdecl(c) : addSuggestion( suggestions, c );
-					default : addSuggestion( suggestions, TypeApi.typeInfos( tree ) );
+					case TTypedecl(t) : addTypeSuggestion( suggestions, t, "typedef" );
+					case TEnumdecl(e) : addTypeSuggestion( suggestions, e, "enum" );
+					case TClassdecl(c) : addTypeSuggestion( suggestions, c, "class" );
+					//default : addTypeSuggestion( suggestions, TypeApi.typeInfos( tree ) );
 					}
 				}
 			}
@@ -136,7 +138,7 @@ class Omnibox {
 				//trace(pfs);
 				if( app.haxe_targets.has( p ) ) {
 					r.push( tree );
-					return;
+					return;addTypeSuggestion
 				}
 			}
 			trace("filtered");
@@ -146,15 +148,15 @@ class Omnibox {
 	}
 	*/
 	
-	function addSuggestion( suggestions : Array<SuggestResult>, c : TypeInfos ) {
+	function addTypeSuggestion( suggestions : Array<SuggestResult>, c : TypeInfos, kind : String ) {
 		var path : String = c.path.split( "." ).join( "/" ).toLowerCase();
 		var i = c.path.lastIndexOf( "." );
 		var name = ( i == -1 ) ? c.path : c.path.substr( i+1 );
 		if( path.startsWith( "flash" ) ) // hacking flash9 target path
 			path = "flash9"+path.substr(5);
 		var url = docpath + path;
-		
-		var description =  "<match>"+c.path+"</match>";
+		var description = if( showTypeKind ) kind+" " else "";
+		description +=  "<match>"+c.path+"</match>";
 		//if( c.path != name ) description += " ("+c.path+")";
 		if( c.doc != null && c.doc != "" ) {
 			var s = c.doc.trim();

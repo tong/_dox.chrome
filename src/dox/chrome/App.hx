@@ -15,10 +15,12 @@ class App implements IApp {
 	static var omnibox : Omnibox;
 	
 	public var searchPrivateTypes(getSearchPrivateTypes,setSearchPrivateTypes) : Bool;
+	public var showTypeKind(getShowTypeKind,setShowTypeKind) : Bool;
 	
 	var websitesearches : Array<String>;
 	var haxetargets : Array<String>;
 	var _searchPrivateTypes : Bool;
+	var _showTypeKind : Bool;
 	
 	function new() {
 	}
@@ -28,6 +30,13 @@ class App implements IApp {
 		omnibox.searchPrivateTypes = v;
 		LocalStorage.setItem( "searchprivatetypes", v ? "1" : "0" );
 		return _searchPrivateTypes = v;
+	}
+	
+	function getShowTypeKind() : Bool return _showTypeKind
+	function setShowTypeKind( v : Bool ) : Bool {
+		omnibox.showTypeKind = v;
+		LocalStorage.setItem( "showtypekind", v ? "1" : "0" );
+		return _showTypeKind = v;
 	}
 	
 	/*
@@ -83,6 +92,13 @@ class App implements IApp {
 			_searchPrivateTypes = ( d == "1" );
 		}
 		
+		d = LocalStorage.getItem( "showtypekind" );
+		if( d == null ) {
+			setShowTypeKind( true );
+		} else {
+			_showTypeKind = ( d == "1" );
+		}
+		
 		d = LocalStorage.getItem( "websitesearches" );
 		if( d == null ) {
 			websitesearches = defaultWebsiteSearches;
@@ -115,9 +131,8 @@ class App implements IApp {
 					}
 					loader.load( true );
 				} else {
-					//TODO
 					trace( e, "error" );
-					UI.desktopNotification( null, "Failed to initialize API store: "+e, 5000 );
+					UI.desktopNotification( null, "Failed to initialize API description store: "+e );
 				}
 			} else {
 				trace( haxe.Timer.stamp()-stime );
@@ -187,6 +202,7 @@ class App implements IApp {
 		LocalStorage.clear();
 		LocalStorage.setItem( "version", DoX.VERSION );
 		setSearchPrivateTypes( true );
+		setShowTypeKind( true );
 		haxetargets = DoX.defaultHaxeTargets;
 		saveHaxetargets();
 		websitesearches = defaultWebsiteSearches;
@@ -214,7 +230,6 @@ class App implements IApp {
 	function xhr( url : String ) {
 		var w = new Worker( "js/worker/xhr.js" );
 		w.onmessage = function(e) {
-			//TODO
 			var d : String = e.data;
 			if( !d.startsWith( "error" ) ) {
 				trace("remote loaded");

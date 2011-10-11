@@ -13,12 +13,6 @@
 	"options_page": "options.html",  
 	"omnibox": { "keyword" : "hx" },
 	
-	"content_scripts": [{
-		"matches": ["http://*/*"],
-		"js": ["content/dox_webapp.js"],
-		"run_at": "document_idle"
-	}],
-	
 	"permissions": [
 		"tabs",
 		"unlimitedStorage",
@@ -28,6 +22,5 @@
 		"http://haxe.org/",
 		"http://*/*",
 		"https://*/*",
-		"http://*/"
 	]
 }
