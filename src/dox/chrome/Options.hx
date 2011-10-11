@@ -111,11 +111,12 @@ class Options {
 							label : "Search settings",
 							content : [
 								{ id : "haxetarget_description", type : "description", content : "Toggle haXe targets to search." },
-								//{ id : "haxetarget_cpp", type : "checkbox", label : "CPP" },
+								{ id : "haxetarget_cpp", type : "checkbox", label : "cpp" },
 								{ id : "haxetarget_flash", type : "checkbox", label : "flash" },
 								{ id : "haxetarget_js", type : "checkbox", label : "js" },
 								{ id : "haxetarget_neko", type : "checkbox", label : "neko" },
-								{ id : "haxetarget_php", type : "checkbox", label : "php" }
+								{ id : "haxetarget_php", type : "checkbox", label : "php" },
+								//{ id : "haxetarget_sys", type : "checkbox", label : "sys" },
 								/*
 								{ type : "margin", value : "16" },
 								{ type : "description", content : "Toggle field/method search." },
@@ -123,6 +124,20 @@ class Options {
 								*/
 							]
 						},
+						/*
+						{
+							id : "docpath",
+							label : "Documentation provider",
+							content : [
+								{ id : "haxetarget_description", type : "description", content : "Toggle haXe targets to search." },
+								//{ id : "haxetarget_cpp", type : "checkbox", label : "CPP" },
+								{ id : "haxetarget_flash", type : "checkbox", label : "flash" },
+								{ id : "haxetarget_js", type : "checkbox", label : "js" },
+								{ id : "haxetarget_neko", type : "checkbox", label : "neko" },
+								{ id : "haxetarget_php", type : "checkbox", label : "php" }
+							]
+						},
+						*/
 						/*
 						{
 							id : "packages",

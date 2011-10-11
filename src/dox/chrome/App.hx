@@ -6,14 +6,12 @@ using StringTools;
 class App implements IApp {
 		 // implements IExt {
 	
-	public static inline var VERSION = "0.2";
-	
-	static var defaultHaxeTargets = ["cpp","flash","js","neko","php"];
+	static var defaultHaxeTargets = ["cpp","flash","js","neko","php"]; //TODO move to DoX.hx
 	static var defaultWebsiteSearches = ["haxe_wiki","haxe_ml","google_code","google_development","stackoverflow"];
 	
 	public static var online(default,null) : Bool;
 	public static var api(default,null) : API;
-	public static var webapp(default,null) : WebApp;
+	//public static var webapp(default,null) : WebApp;
 	
 	static var omnibox : Omnibox;
 	
@@ -62,7 +60,7 @@ class App implements IApp {
 			//TODO compare versions
 		}
 		
-		LocalStorage.setItem( "version", VERSION );
+		LocalStorage.setItem( "version", DoX.VERSION );
 		
 		var d = LocalStorage.getItem( "haxetargets" );
 		if( d == null ) {
@@ -81,11 +79,14 @@ class App implements IApp {
 		
 		var stime = haxe.Timer.stamp();
 		
+		trace( "Actvive haxe targets: "+haxetargets );
+		
 		api = new API();
 		api.init( function(e){
 			if( e != null ) {
 				//TODO
-				trace( e );
+				UI.desktopNotification( null, "Failed to initialize API store: "+e, 5000 );
+				trace( e, "error" );
 			} else {
 				trace( haxe.Timer.stamp()-stime );
 				run();
@@ -95,8 +96,8 @@ class App implements IApp {
 	
 	function run() {
 	//	if( use_omnibox ) {
-			omnibox = new Omnibox( this );
-			omnibox.activate();
+		omnibox = new Omnibox( this );
+		omnibox.activate();
 	//	}
 	/*
 		webapp = new WebApp();
@@ -155,7 +156,7 @@ class App implements IApp {
 	public function resetSettings() {
 		trace( "Resetting ..." );
 		LocalStorage.clear();
-		LocalStorage.setItem( "version", VERSION );
+		LocalStorage.setItem( "version", DoX.VERSION );
 		haxetargets = defaultHaxeTargets;
 		saveHaxetargets();
 		websitesearches = defaultWebsiteSearches;

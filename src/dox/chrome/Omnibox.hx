@@ -10,6 +10,13 @@ class Omnibox {
 	public static inline var MAX_SUGGESTIONS = 5;
 	public static inline var HAXE_ORG_API_PATH = "http://haxe.org/api/";
 	
+	///////////////////////////////
+	/*
+	static var LOCAL_DOCS = "file:///usr/lib/haxe/doc/content/haxe/rtti/TypeTree.html";
+	public var useLocalDocs : Bool;
+	*/
+	///////////////////////////////
+	
 	public var active(default,null) : Bool;
 	
 	var app : IApp;
@@ -20,6 +27,8 @@ class Omnibox {
 		this.app = app;
 		active = false;
 		docpath = HAXE_ORG_API_PATH;
+		
+		//useLocalDocs = true;
 	}
 	
 	public function activate() {
@@ -144,18 +153,11 @@ class Omnibox {
 		var description =  "<match>"+c.path+"</match>";
 		//if( c.path != name ) description += " ("+c.path+")";
 		if( c.doc != null && c.doc != "" ) {
-			//TODO
-			/*
 			var s = c.doc.trim();
-			var r = ~/(<.+>)/;
-			s = r.replace( s, "" );
-			s = s.replace( "\n", " " );
-			//if( s.length > 68 )
-			//	s = s.substr(0,64)+" ...";
+			if( s.length > 68 ) s = s.substr(0,64)+" ...";
 			description += " - "+s;
-			*/
 		}
-		description += " - <url><dim>"+url+"</dim></url>";
+		description += "<url><dim> - "+url+"</dim></url>";
 		suggestions.push( { content : url, description: description } );
 	}
 	
