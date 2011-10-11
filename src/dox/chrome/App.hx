@@ -6,24 +6,28 @@ using StringTools;
 class App implements IApp {
 		 // implements IExt {
 	
-	static var defaultHaxeTargets = ["cpp","flash","js","neko","php"]; //TODO move to DoX.hx
 	static var defaultWebsiteSearches = ["haxe_wiki","haxe_ml","google_code","google_development","stackoverflow"];
 	
-	public static var online(default,null) : Bool;
+	//public static var online(default,null) : Bool;
 	public static var api(default,null) : API;
 	//public static var webapp(default,null) : WebApp;
 	
 	static var omnibox : Omnibox;
 	
-	//public var use_omnibox(default,setUseOmnibox) : Bool;
-//	public var haxe_targets(default,null) : Array<String>;
-//	public var website_search_suggestions(default,null) : Array<String>;
+	public var searchPrivateTypes(getSearchPrivateTypes,setSearchPrivateTypes) : Bool;
 	
 	var websitesearches : Array<String>;
 	var haxetargets : Array<String>;
-	//var useomnibox : Bool;
+	var _searchPrivateTypes : Bool;
 	
 	function new() {
+	}
+	
+	function getSearchPrivateTypes() : Bool return _searchPrivateTypes
+	function setSearchPrivateTypes( v : Bool ) : Bool {
+		omnibox.searchPrivateTypes = v;
+		LocalStorage.setItem( "searchprivatetypes", v ? "1" : "0" );
+		return _searchPrivateTypes = v;
 	}
 	
 	/*
@@ -40,7 +44,9 @@ class App implements IApp {
 	
 	function init() {
 		
-		online =  untyped window.navigator.onLine;
+		//online = untyped window.navigator.onLine;
+		
+		omnibox = new Omnibox( this );
 		
 		var version = LocalStorage.getItem( "version" );
 		if( version == null ) { // extension version was < 0.2
@@ -64,11 +70,19 @@ class App implements IApp {
 		
 		var d = LocalStorage.getItem( "haxetargets" );
 		if( d == null ) {
-			haxetargets = defaultHaxeTargets;
+			haxetargets = DoX.defaultHaxeTargets;
 			saveHaxetargets();
 		} else {
 			haxetargets = JSON.parse( d );
 		}
+		
+		d = LocalStorage.getItem( "searchprivatetypes" );
+		if( d == null ) {
+			setSearchPrivateTypes( true );
+		} else {
+			_searchPrivateTypes = ( d == "1" );
+		}
+		
 		d = LocalStorage.getItem( "websitesearches" );
 		if( d == null ) {
 			websitesearches = defaultWebsiteSearches;
@@ -84,25 +98,32 @@ class App implements IApp {
 		api = new API();
 		api.init( function(e){
 			if( e != null ) {
-				//TODO
-				UI.desktopNotification( null, "Failed to initialize API store: "+e, 5000 );
-				trace( e, "error" );
+				trace(e);
+				if( e == "0" ) {
+					var loader = new APILoader( API.REMOTE_HOST+"std.dx" );
+					loader.onSuccess = function(t){
+						api.mergeString(t);
+						run();
+					}
+					loader.load( true );
+				} else {
+					//TODO
+					trace( e, "error" );
+					UI.desktopNotification( null, "Failed to initialize API store: "+e, 5000 );
+				}
 			} else {
 				trace( haxe.Timer.stamp()-stime );
+				//if( api
 				run();
 			}
 		});
 	}
 	
 	function run() {
-	//	if( use_omnibox ) {
-		omnibox = new Omnibox( this );
+		omnibox.searchPrivateTypes = _searchPrivateTypes;
 		omnibox.activate();
-	//	}
-	/*
-		webapp = new WebApp();
-		webapp.init();
-	*/
+		//webapp = new WebApp();
+		//webapp.init();
 	}
 	
 	/// ---------- IApp ----------
@@ -116,7 +137,6 @@ class App implements IApp {
 			return false;
 		haxetargets.push( t );
 		saveHaxetargets();
-		//omnibox.platforms = haxetargets.copy();
 		return true;
 	}
 	
@@ -157,7 +177,8 @@ class App implements IApp {
 		trace( "Resetting ..." );
 		LocalStorage.clear();
 		LocalStorage.setItem( "version", DoX.VERSION );
-		haxetargets = defaultHaxeTargets;
+		setSearchPrivateTypes( true );
+		haxetargets = DoX.defaultHaxeTargets;
 		saveHaxetargets();
 		websitesearches = defaultWebsiteSearches;
 		saveWebsitesearches();

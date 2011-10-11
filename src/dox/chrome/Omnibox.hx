@@ -18,6 +18,7 @@ class Omnibox {
 	///////////////////////////////
 	
 	public var active(default,null) : Bool;
+	public var searchPrivateTypes : Bool;
 	
 	var app : IApp;
 	var docpath : String;
@@ -27,8 +28,8 @@ class Omnibox {
 		this.app = app;
 		active = false;
 		docpath = HAXE_ORG_API_PATH;
-		
 		//useLocalDocs = true;
+		searchPrivateTypes = true;
 	}
 	
 	public function activate() {
@@ -36,7 +37,7 @@ class Omnibox {
 		chrome.Omnibox.onInputCancelled.addListener( onInputCancelled );
 		chrome.Omnibox.onInputChanged.addListener( onInputChanged );
 		chrome.Omnibox.onInputEntered.addListener( onInputEntered );
-		search = new APISearch();
+		search = new APISearch( searchPrivateTypes );
 		active = true;
 		trace( "DoX omnibox activated" );
 	}
@@ -76,6 +77,7 @@ class Omnibox {
 		var term = stext.toLowerCase();
 		
 		//var stime = haxe.Timer.stamp();
+		search.searchPrivateTypes = searchPrivateTypes;
 		search.run( term, App.api.root, app.getHaxeTargets(), function(found){
 			//trace( found.length+" trees found ("+(haxe.Timer.stamp()-stime)+")" );
 			var suggestions = new Array<SuggestResult>();
@@ -86,8 +88,8 @@ class Omnibox {
 					var tree = found[i];
 					switch( tree ) {
 					case TPackage(n,f,subs) :
-					//	if( n.fastCodeAt(0) == 95 ) // "_"
-		//					continue;
+						//if( n.fastCodeAt(0) == 95 ) // "_"
+						//	continue;
 						//trace( f );
 						var parts = f.split( "." );
 						for( p in parts ) {
@@ -97,10 +99,10 @@ class Omnibox {
 								description : "<match>"+f+"</match> - <url><dim>"+url+"</dim></url>"
 							});
 						}
-					case TTypedecl(t) : addSuggestion( suggestions, t );
-					case TEnumdecl(e) : addSuggestion( suggestions, e );
-					case TClassdecl(c) : addSuggestion( suggestions, c );
-					//default : addSuggestion( suggestions, TypeApi.typeInfos( tree ) );
+					//case TTypedecl(t) : addSuggestion( suggestions, t );
+					//case TEnumdecl(e) : addSuggestion( suggestions, e );
+					//case TClassdecl(c) : addSuggestion( suggestions, c );
+					default : addSuggestion( suggestions, TypeApi.typeInfos( tree ) );
 					}
 				}
 			}
@@ -118,6 +120,7 @@ class Omnibox {
 					suggestions.push( createWebsiteSuggestionURL( stext, "Google Development", "http://www.google.com/cse?cx=005154715738920500810:fmizctlroiw&amp;q=" ) );
 			}
 			suggest( suggestions );
+				
 		});
 	}
 	
@@ -143,13 +146,14 @@ class Omnibox {
 	}
 	*/
 	
-	function addSuggestion( suggestions : Array<SuggestResult>, c : Dynamic ) {
+	function addSuggestion( suggestions : Array<SuggestResult>, c : TypeInfos ) {
 		var path : String = c.path.split( "." ).join( "/" ).toLowerCase();
 		var i = c.path.lastIndexOf( "." );
 		var name = ( i == -1 ) ? c.path : c.path.substr( i+1 );
 		if( path.startsWith( "flash" ) ) // hacking flash9 target path
 			path = "flash9"+path.substr(5);
 		var url = docpath + path;
+		
 		var description =  "<match>"+c.path+"</match>";
 		//if( c.path != name ) description += " ("+c.path+")";
 		if( c.doc != null && c.doc != "" ) {

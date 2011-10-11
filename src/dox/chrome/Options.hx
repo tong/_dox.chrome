@@ -21,12 +21,12 @@ class Options {
 			for( id in ids ) {
 				switch( id ) {
 				case "haxe_targets" :
-					//trace(app.haxe_target);
 					for( id in app.getHaxeTargets() )
 						j( '#haxetarget_'+id ).attr( 'checked', 'true' );
 				case "search_suggestions" :
 					for( id in app.getWebsiteSearchSuggestions() )
 						j( '#websitesearch_'+id ).attr( 'checked', 'true' );
+					j( '#search_private_types' ).attr( 'checked', app.searchPrivateTypes?'checked':null );
 				}
 			}
 		}
@@ -35,8 +35,8 @@ class Options {
 			case "reset" :
 				j( '#reload_api_description' ).hide();
 				j( '#reset' ).hide();
+				app.resetSettings();
 				haxe.Timer.delay( function(){
-					app.resetSettings();
 					haxe.Timer.delay( function(){
 						chrome.Tabs.getSelected( null, function(tab) {
 							j('#chrome-options').fadeOut(400,function(){
@@ -54,15 +54,10 @@ class Options {
 					if( params ) app.addHaxeTarget( _id ) else app.removeHaxeTarget( _id );
 			//		app.saveSettings();
 					if( app.getHaxeTargets().length == 0 )
-						showDesktopNotification( "Warning!", "You just deactivated all haXe targets!", 5200 );
+						UI.desktopNotification( "Warning!", "You just deactivated all haXe targets!", 5200 );
 					return;
 				}
-				if( id.startsWith( 'websitesearch' ) ) {
-					var _id = id.substr( 14 );
-					if( params ) app.addWebsiteSearchSuggestion( _id ) else app.removeWebsiteSearchSuggestion( _id );
-			//		app.saveSettings();
-					return;
-				}
+				/*
 				if( id.startsWith( 'displaytarget_' ) ) {
 					var _id = id.substr( 14 );
 					//TODO ........................
@@ -74,6 +69,17 @@ class Options {
 						info.html('Omnibox display');
 					}
 					//trace(_id);
+					return;
+				}
+				*/
+				if( id.startsWith( 'websitesearch' ) ) {
+					var _id = id.substr( 14 );
+					if( params ) app.addWebsiteSearchSuggestion( _id ) else app.removeWebsiteSearchSuggestion( _id );
+			//		app.saveSettings();
+					return;
+				}
+				if( id.startsWith( 'search_private_types' ) ) {
+					app.searchPrivateTypes = params;
 					return;
 				}
 				trace("??????? "+id );
@@ -117,6 +123,8 @@ class Options {
 								{ id : "haxetarget_neko", type : "checkbox", label : "neko" },
 								{ id : "haxetarget_php", type : "checkbox", label : "php" },
 								//{ id : "haxetarget_sys", type : "checkbox", label : "sys" },
+								{ type : "margin", value : "16" },
+								{ id : "search_private_types", type : "checkbox", label : "Search private types" },
 								/*
 								{ type : "margin", value : "16" },
 								{ type : "description", content : "Toggle field/method search." },
@@ -233,10 +241,6 @@ class Options {
 		return null;	
 	}
 	*/
-	
-	static function showDesktopNotification( title : String, m : String, time : Int ) {
-		dui.Notification.show( "DoX - "+title, m, time, "icons/icon_48.png");
-	}
 	
 	static inline function j( id : Dynamic ) : js.JQuery return new js.JQuery( id )
 	
