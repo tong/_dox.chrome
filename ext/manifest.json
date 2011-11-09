@@ -1,8 +1,7 @@
 {
 	"name": "DoX",
 	"description": "HaXe API omnibox search",
-	"version": "0.2",
-	"minimum_chrome_version" : "13",
+	"version": "0.2.1",
 	"icons": {
 		"16": "img/icon_16.png",
 		"32": "img/icon_32.png",
@@ -20,7 +19,6 @@
 		"contextMenus",
 		"https://raw.github.com/",
 		"http://haxe.org/",
-		"http://*/*",
-		"https://*/*",
+		"http://*/*","https://*/*"
 	]
 }
