@@ -1,0 +1,6 @@
+#!/bin/bash
+
+java -jar /home/t0ng/data/bin/yuicompressor.jar ext/js/app.js -o ext/js/app.js
+java -jar /home/t0ng/data/bin/yuicompressor.jar ext/js/options.js -o ext/js/options.js
+zip -r dox.zip ext
+echo Done
