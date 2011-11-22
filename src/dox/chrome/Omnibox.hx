@@ -57,26 +57,33 @@ class Omnibox {
 	
 	function onInputStarted() {
 		trace( "Input started" );
+		setDefaultSuggestion( "<dim>- no input</dim>" );
 	}
 	
 	function onInputCancelled() {
 		trace( "Input cancelled" );
-		setDefaultSuggestion();
+		setDefaultSuggestion( "<dim>- no input</dim>" );
 	}
 	
 	function onInputChanged( text : String, suggest : Array<chrome.SuggestResult>->Void ) {
 		
-		if( text == null )
+		if( text == null ) {
+			setDefaultSuggestion( "<dim>- no input</dim>" );
 			return;
+		}
 		var stext = text.trim();
-		if( stext == null )
+		if( stext == null ) {
+			setDefaultSuggestion( "<dim>- no input</dim>" );
 			return;
+		}
 		if( stext == "" ) {
-			setDefaultSuggestion();
+			setDefaultSuggestion( "<dim>- no input</dim>" );
 			return;
 		}
 		
 		var term = stext.toLowerCase();
+		
+		var numSuggestionsFound = 0; //suggestions.length
 		
 		//var stime = haxe.Timer.stamp();
 		search.searchPrivateTypes = searchPrivateTypes;
@@ -84,6 +91,7 @@ class Omnibox {
 			//trace( found.length+" trees found ("+(haxe.Timer.stamp()-stime)+")" );
 			var suggestions = new Array<SuggestResult>();
 			if( found.length > 0 ) { // add found links
+				numSuggestionsFound = found.length;
 				if( found.length > MAX_SUGGESTIONS ) found = found.slice( 0, MAX_SUGGESTIONS );
 				var n = ( found.length < MAX_SUGGESTIONS ) ? found.length : MAX_SUGGESTIONS;
 				for( i in 0...n ) {
@@ -121,8 +129,9 @@ class Omnibox {
 				if( suggestions.length < MAX_SUGGESTIONS && sugs.has( "google_development" ) )
 					suggestions.push( createWebsiteSuggestionURL( stext, "Google Development", "http://www.google.com/cse?cx=005154715738920500810:fmizctlroiw&amp;q=" ) );
 			}
+			
 			suggest( suggestions );
-				
+			setDefaultSuggestion( "<dim>- "+numSuggestionsFound+" found</dim>" );
 		});
 	}
 	
@@ -206,8 +215,8 @@ class Omnibox {
 		}
 	}
 	
-	function setDefaultSuggestion( ?text : String ) {
-		var d = '<url><match>HaXe</match></url>';
+	function setDefaultSuggestion( text : String = " " ) {
+		var d = '<dim><match>HaXe</match></dim>';
 		if( text != null ) d +=  " "+text;
 		chrome.Omnibox.setDefaultSuggestion( { description : d } );
 	}

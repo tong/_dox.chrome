@@ -1,7 +1,7 @@
 {
 	"name": "DoX",
 	"description": "HaXe API omnibox search",
-	"version": "0.2.1",
+	"version": "0.2.2",
 	"icons": {
 		"16": "img/icon_16.png",
 		"32": "img/icon_32.png",
