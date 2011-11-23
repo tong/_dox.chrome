@@ -136,6 +136,7 @@ class Options {
 							label : "Website search suggestions",
 							content : [
 								{ id : "websitesearch_description", type : "description", content : "Show search suggestions if your query is not found in the API." },
+								{ id : "websitesearch_google_group", type : "checkbox", label : "Google Group" },
 								{ id : "websitesearch_haxe_wiki", type : "checkbox", label : "HaXe Wiki" },
 								{ id : "websitesearch_haxe_ml", type : "checkbox", label : "HaXe Mailing List" },
 								{ id : "websitesearch_google_development", type : "checkbox", label : "Google Development" },

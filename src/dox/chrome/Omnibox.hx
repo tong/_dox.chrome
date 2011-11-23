@@ -118,6 +118,8 @@ class Omnibox {
 			}
 			if( stext.length >= 2 ) { // add website search suggestions
 				var sugs = app.getWebsiteSearchSuggestions();
+				if( suggestions.length < MAX_SUGGESTIONS && sugs.has( "google_group" ) )
+					suggestions.push( createWebsiteSuggestionURL( stext, "Google Group", "https://groups.google.com/forum/#!searchin/haxelang/" ) );
 				if( suggestions.length < MAX_SUGGESTIONS && sugs.has( "haxe_wiki" ) )
 					suggestions.push( createWebsiteSuggestionURL( stext, "HaXe Wiki", "http://haxe.org/wiki/search?s=" ) );
 				if( suggestions.length < MAX_SUGGESTIONS && sugs.has( "haxe_ml" ) )
@@ -132,6 +134,7 @@ class Omnibox {
 			
 			suggest( suggestions );
 			setDefaultSuggestion( "<dim>- "+numSuggestionsFound+" found</dim>" );
+			
 		});
 	}
 	
@@ -191,11 +194,18 @@ class Omnibox {
 			App.nav( "http://"+stext );
 			return;
 		}
+		
         var suffix = " [HaXe Wiki]";
         if( stext.endsWith( suffix ) ) {
         	App.nav( "http://haxe.org/wiki/search?s="+formatSearchSuggestionQuery( stext, suffix ) );
 			return;
         }	
+        
+        if( stext.endsWith( suffix = " [Google Group]" ) ) {
+			App.nav( "https://groups.google.com/forum/#!searchin/haxelang/"+formatSearchSuggestionQuery( stext, suffix ) );
+			return;
+		}
+        
 		if( stext.endsWith( suffix = " [HaXe Mailing List]" ) ) {
 			App.nav( "http://haxe.1354130.n2.nabble.com/template/NamlServlet.jtp?macro=search_page&node=1354130&query="+formatSearchSuggestionQuery( stext, suffix )  );
 			return;
