@@ -10,13 +10,6 @@ class Omnibox {
 	public static inline var MAX_SUGGESTIONS = 5;
 	public static inline var HAXE_ORG_API_PATH = "http://haxe.org/api/";
 	
-	///////////////////////////////
-	/*
-	static var LOCAL_DOCS = "file:///usr/lib/haxe/doc/content/haxe/rtti/TypeTree.html";
-	public var useLocalDocs : Bool;
-	*/
-	///////////////////////////////
-	
 	public var active(default,null) : Bool;
 	public var searchPrivateTypes : Bool;
 	public var showTypeKind : Bool;
@@ -164,8 +157,8 @@ class Omnibox {
 		var path : String = c.path.split( "." ).join( "/" ).toLowerCase();
 		var i = c.path.lastIndexOf( "." );
 		var name = ( i == -1 ) ? c.path : c.path.substr( i+1 );
-		if( path.startsWith( "flash" ) ) // hacking flash9 target path
-			path = "flash9"+path.substr(5);
+		//if( path.startsWith( "flash" ) ) // hacking flash9 target path
+			//path = "flash9"+path.substr(5);
 		var url = docpath + path;
 		var description = if( showTypeKind ) kind+" " else "";
 		description +=  "<match>"+c.path+"</match>";
@@ -200,12 +193,10 @@ class Omnibox {
         	App.nav( "http://haxe.org/wiki/search?s="+formatSearchSuggestionQuery( stext, suffix ) );
 			return;
         }	
-        
         if( stext.endsWith( suffix = " [Google Group]" ) ) {
 			App.nav( "https://groups.google.com/forum/#!searchin/haxelang/"+formatSearchSuggestionQuery( stext, suffix ) );
 			return;
 		}
-        
 		if( stext.endsWith( suffix = " [HaXe Mailing List]" ) ) {
 			App.nav( "http://haxe.1354130.n2.nabble.com/template/NamlServlet.jtp?macro=search_page&node=1354130&query="+formatSearchSuggestionQuery( stext, suffix )  );
 			return;

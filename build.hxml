@@ -1,8 +1,8 @@
 
 -cp src
 -cp ../dox
--cp ../dui
--cp ../dsi
+#-cp ../dui
+#-cp ../dsi
 -cp ../hx.html5
 -cp ../hx.html5/webdb
 -cp ../chrome.extension

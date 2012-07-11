@@ -57,12 +57,14 @@ class App implements IApp {
 		
 		omnibox = new Omnibox( this );
 		
+		//LocalStorage.clear(); return;
+		
 		var version = LocalStorage.getItem( "version" );
 		if( version == null ) { // extension version was < 0.2
 			trace( "Previous DoX version was < 0.2 .. going to delete my local cache" );
 			try LocalStorage.clear() catch( e : Dynamic ) trace( e, "warn" );
 			try {
-				var fs = new dsi.FileSystem();
+				var fs = new dox.util.FileSystem();
 				fs.init( 1, function(e){
 					fs.delete( "api", function(e){
 						if( e != null ) trace( "Local filesystem cleared" ) else trace(e);
@@ -111,10 +113,12 @@ class App implements IApp {
 		
 		trace( "Actvive haxe targets: "+haxetargets );
 		
+		// --- initialize API description
 		api = new API();
 		api.init( function(e){
 			if( e != null ) {
 				if( e == "0" ) {
+					// --- load api description from remote host
 					var loader = new APILoader( API.REMOTE_HOST+"std.dx" );
 					loader.onSuccess = function(t){
 						UI.desktopNotification( "", "Std api description updated" );
@@ -244,7 +248,16 @@ class App implements IApp {
 	//--------------------------------------
 	
 	public static function nav( url : String ) {
-		chrome.Tabs.getSelected( null, function(tab) { chrome.Tabs.update( tab.id, { url : url } ); } );
+		//chrome.Tabs.getCurrent( function(tab) {
+		chrome.Tabs.query( { active : true }, function(tabs:Dynamic) {
+			//trace(tabs);
+			var tab = tabs[0];
+			chrome.Tabs.update( tab.id, { url : url } );
+		} );
+		/*
+		chrome.Tabs.create( { url : url }, function(tab){
+		});
+		*/
 	}
 	
 	static function __init() : IApp {

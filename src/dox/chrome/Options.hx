@@ -38,7 +38,7 @@ class Options {
 				app.resetSettings();
 				haxe.Timer.delay( function(){
 					haxe.Timer.delay( function(){
-						chrome.Tabs.getSelected( null, function(tab) {
+						chrome.Tabs.getSelected( function(tab) {
 							j('#chrome-options').fadeOut(400,function(){
 								chrome.Tabs.remove(tab.id);
 							});
