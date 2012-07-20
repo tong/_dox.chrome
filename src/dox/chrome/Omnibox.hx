@@ -190,7 +190,7 @@ class Omnibox {
 		
         var suffix = " [HaXe Wiki]";
         if( stext.endsWith( suffix ) ) {
-        	App.nav( "http://haxe.org/wiki/search?s="+formatSearchSuggestionQuery( stext, suffix ) );
+        	App.nav( "http://haxe.org/wiki/search?cse_query="+formatSearchSuggestionQuery( stext, suffix ) );
 			return;
         }	
         if( stext.endsWith( suffix = " [Google Group]" ) ) {
