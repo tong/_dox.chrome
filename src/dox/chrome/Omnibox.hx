@@ -114,7 +114,7 @@ class Omnibox {
 				if( suggestions.length < MAX_SUGGESTIONS && sugs.has( "google_group" ) )
 					suggestions.push( createWebsiteSuggestionURL( stext, "Google Group", "https://groups.google.com/forum/#!searchin/haxelang/" ) );
 				if( suggestions.length < MAX_SUGGESTIONS && sugs.has( "haxe_wiki" ) )
-					suggestions.push( createWebsiteSuggestionURL( stext, "HaXe Wiki", "http://haxe.org/wiki/search?s=" ) );
+					suggestions.push( createWebsiteSuggestionURL( stext, "HaXe Wiki", "http://haxe.org/wiki/search?cse_query=" ) );
 				if( suggestions.length < MAX_SUGGESTIONS && sugs.has( "haxe_ml" ) )
 					suggestions.push( createWebsiteSuggestionURL( stext, "HaXe Mailing List", "http%3A%2F%2Fhaxe.1354130.n2.nabble.com%2Ftemplate%2FNamlServlet.jtp%3Fmacro%3Dsearch_page%26node%3D1354130%26query%3D" ) );
 				if( suggestions.length < MAX_SUGGESTIONS && sugs.has( "stackoverflow" ) )
